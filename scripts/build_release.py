@@ -32,6 +32,8 @@ EXCLUDED_SUFFIXES = {
     ".tmp",
 }
 
+RELEASE_FILE_PREFIX = "dictover"
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -114,11 +116,15 @@ def build_archive(archive_path: Path, files: list[Path], root: Path) -> None:
             archive.write(file_path, arcname)
 
 
-def cleanup_previous_artifacts(output_dir: Path, package_name: str) -> None:
-    patterns = [
-        f"{package_name}.ankiaddon",
-        f"{package_name}-*.ankiaddon",
-    ]
+def cleanup_previous_artifacts(output_dir: Path, prefixes: list[str]) -> None:
+    patterns: list[str] = []
+    for prefix in prefixes:
+        normalized = str(prefix or "").strip()
+        if not normalized:
+            continue
+        patterns.append(f"{normalized}.ankiaddon")
+        patterns.append(f"{normalized}-*.ankiaddon")
+
     for pattern in patterns:
         for path in output_dir.glob(pattern):
             if path.is_file():
@@ -129,15 +135,18 @@ def main() -> int:
     args = parse_args()
     root = Path(__file__).resolve().parents[1]
     manifest = load_manifest(root)
-    package_name = str(manifest.get("package") or root.name).strip() or root.name
+    legacy_package_name = str(manifest.get("package") or root.name).strip() or root.name
     version = load_manifest_version(manifest)
 
     output_dir = (root / args.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
-    cleanup_previous_artifacts(output_dir, package_name)
+    cleanup_previous_artifacts(
+        output_dir,
+        [RELEASE_FILE_PREFIX, legacy_package_name],
+    )
 
     files = collect_files(root, include_scripts=bool(args.include_scripts))
-    stem = f"{package_name}-{version}"
+    stem = f"{RELEASE_FILE_PREFIX}-{version}"
 
     ankiaddon_path = output_dir / f"{stem}.ankiaddon"
 
