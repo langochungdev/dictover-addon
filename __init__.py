@@ -20,22 +20,32 @@ ADDON_DIR = Path(__file__).resolve().parent
 ADDON_PARENT_DIR = ADDON_DIR.parent
 ADDON_VENDOR_DIR = ADDON_DIR / "_vendor"
 ADDON_WEB_ID = mw.addonManager.addonFromModule(__name__) or ADDON_MODULE
-ASSET_VERSION = "20260328i"
+ASSET_VERSION = "20260404b"
 ASSET_CSS_PATH = f"/_addons/{ADDON_WEB_ID}/web/popup.css?v={ASSET_VERSION}"
 ASSET_JS_PATH = f"/_addons/{ADDON_WEB_ID}/web/popup.js?v={ASSET_VERSION}"
 ADDON_MANIFEST_PATH = ADDON_DIR / "manifest.json"
 
 
 def _read_addon_version() -> str:
+    version = ""
     try:
         payload = json.loads(ADDON_MANIFEST_PATH.read_text(encoding="utf-8"))
+        if isinstance(payload, dict):
+            version = str(payload.get("version") or "").strip()
     except Exception:
-        return "unknown"
+        version = ""
 
-    if not isinstance(payload, dict):
-        return "unknown"
+    if version:
+        return version
 
-    version = str(payload.get("version") or "").strip()
+    config_path = ADDON_DIR / "config.json"
+    try:
+        config_payload = json.loads(config_path.read_text(encoding="utf-8"))
+        if isinstance(config_payload, dict):
+            version = str(config_payload.get("addon_version") or "").strip()
+    except Exception:
+        version = ""
+
     return version or "unknown"
 
 
@@ -79,7 +89,9 @@ _DDG_VQD_CACHE: dict[str, str] = {}
 
 def _write_install_ping_marker(payload: dict[str, object]) -> None:
     marker_tmp = INSTALL_PING_MARKER.with_suffix(".json.tmp")
-    marker_tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    marker_tmp.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     marker_tmp.replace(INSTALL_PING_MARKER)
 
 
@@ -96,7 +108,9 @@ def _read_install_ping_marker() -> dict[str, object]:
 
 def _is_install_ping_disabled() -> bool:
     payload = _load_raw_config_file()
-    raw_value = payload.get("disable_install_ping") if isinstance(payload, dict) else None
+    raw_value = (
+        payload.get("disable_install_ping") if isinstance(payload, dict) else None
+    )
     return _coerce_bool(raw_value, False)
 
 
@@ -117,7 +131,7 @@ def _write_install_ping_state(state: dict[str, object]) -> None:
     try:
         mw.addonManager.writeConfig(__name__, config)
     except Exception as error:
-        print(f"[{ADDON_MODULE}] Cannot persist install ping state: {error}")
+        _runtime_log(f"Cannot persist install ping state: {error}")
 
 
 def _is_install_ping_attempted(state: dict[str, object]) -> bool:
@@ -128,14 +142,27 @@ def _is_install_ping_attempted(state: dict[str, object]) -> bool:
     return text in {"1", "true", "yes", "on"}
 
 
-def _mark_install_ping_attempted(marker_payload: dict[str, object], status: str = "pending") -> None:
+def _mark_install_ping_attempted(
+    marker_payload: dict[str, object], status: str = "pending"
+) -> None:
+    marker_version = str(
+        marker_payload.get("reported_version") or marker_payload.get("version") or ""
+    ).strip()
     state = _read_install_ping_state()
     state.update(
         {
             "attempted": True,
-            "install_id": str(marker_payload.get("install_id") or state.get("install_id") or ""),
-            "created_at": int(marker_payload.get("created_at") or state.get("created_at") or int(time.time())),
+            "install_id": str(
+                marker_payload.get("install_id") or state.get("install_id") or ""
+            ),
+            "created_at": int(
+                marker_payload.get("created_at")
+                or state.get("created_at")
+                or int(time.time())
+            ),
             "status": str(status or state.get("status") or "pending"),
+            "reported_version": marker_version
+            or str(state.get("reported_version") or ""),
             "updated_at": int(time.time()),
         }
     )
@@ -143,11 +170,15 @@ def _mark_install_ping_attempted(marker_payload: dict[str, object], status: str 
 
 
 def _send_install_ping_once(marker_payload: dict[str, object]) -> None:
+    payload_version = (
+        str(marker_payload.get("reported_version") or ADDON_VERSION or "").strip()
+        or "unknown"
+    )
     payload = {
         "event": "install",
         "addon_module": ADDON_MODULE,
         "addon_web_id": str(ADDON_WEB_ID),
-        "version": ADDON_VERSION,
+        "version": payload_version,
         "install_id": str(marker_payload.get("install_id", "")),
         "created_at": int(marker_payload.get("created_at", 0) or 0),
         "sent_at": int(time.time()),
@@ -178,22 +209,30 @@ def _send_install_ping_once(marker_payload: dict[str, object]) -> None:
     marker_payload["status"] = "ok" if ok else "error"
     marker_payload["http_status"] = status
     marker_payload["error"] = error_message
+    marker_payload["reported_version"] = payload_version
 
     try:
         _write_install_ping_marker(marker_payload)
     except Exception as error:
-        print(f"[{ADDON_MODULE}] Cannot update install ping marker: {error}")
+        _runtime_log(f"Cannot update install ping marker: {error}")
 
     state = _read_install_ping_state()
     state.update(
         {
             "attempted": True,
-            "install_id": str(marker_payload.get("install_id") or state.get("install_id") or ""),
-            "created_at": int(marker_payload.get("created_at") or state.get("created_at") or int(time.time())),
+            "install_id": str(
+                marker_payload.get("install_id") or state.get("install_id") or ""
+            ),
+            "created_at": int(
+                marker_payload.get("created_at")
+                or state.get("created_at")
+                or int(time.time())
+            ),
             "sent_at": int(marker_payload.get("sent_at") or int(time.time())),
             "status": "ok" if ok else "error",
             "http_status": status,
             "error": error_message,
+            "reported_version": payload_version,
             "updated_at": int(time.time()),
         }
     )
@@ -205,7 +244,45 @@ def _ensure_install_ping_once() -> None:
         return
 
     install_ping_state = _read_install_ping_state()
+    current_version = str(ADDON_VERSION or "").strip()
+    current_version_known = (
+        bool(current_version) and current_version.lower() != "unknown"
+    )
+    state_reported_version = str(
+        install_ping_state.get("reported_version") or ""
+    ).strip()
+    state_reported_unknown = (
+        not state_reported_version or state_reported_version.lower() == "unknown"
+    )
+
     if _is_install_ping_attempted(install_ping_state):
+        if current_version_known and state_reported_unknown:
+            marker_payload = {
+                "version": 1,
+                "install_id": str(
+                    install_ping_state.get("install_id") or uuid.uuid4().hex
+                ),
+                "created_at": int(
+                    install_ping_state.get("created_at") or int(time.time())
+                ),
+                "status": "pending",
+                "reported_version": current_version,
+            }
+
+            try:
+                _write_install_ping_marker(marker_payload)
+            except Exception as error:
+                _runtime_log(f"Cannot create corrective install ping marker: {error}")
+                return
+
+            _mark_install_ping_attempted(marker_payload, status="pending")
+
+            threading.Thread(
+                target=_send_install_ping_once,
+                args=(marker_payload,),
+                name="apl-install-ping-corrective",
+                daemon=True,
+            ).start()
         return
 
     marker_payload: dict[str, object]
@@ -222,6 +299,7 @@ def _ensure_install_ping_once() -> None:
             "install_id": str(existing.get("install_id") or uuid.uuid4().hex),
             "created_at": int(existing.get("created_at") or int(time.time())),
             "status": "pending",
+            "reported_version": current_version,
         }
     else:
         marker_payload = {
@@ -229,12 +307,13 @@ def _ensure_install_ping_once() -> None:
             "install_id": uuid.uuid4().hex,
             "created_at": int(time.time()),
             "status": "pending",
+            "reported_version": current_version,
         }
 
     try:
         _write_install_ping_marker(marker_payload)
     except Exception as error:
-        print(f"[{ADDON_MODULE}] Cannot create install ping marker: {error}")
+        _runtime_log(f"Cannot create install ping marker: {error}")
         return
 
     # Mark as attempted before background send so addon updates do not ping again.
@@ -282,7 +361,9 @@ def _normalize_definition_language_mode(value: object) -> str:
     return "output"
 
 
-def _normalize_auto_play_audio_mode(value: object, legacy_auto_play: object | None = None) -> str:
+def _normalize_auto_play_audio_mode(
+    value: object, legacy_auto_play: object | None = None
+) -> str:
     mode = str(value or "").strip().lower()
     if mode in {"word", "all"}:
         return mode
@@ -410,11 +491,19 @@ def _runtime_settings_from_file_only() -> dict[str, object]:
 def _save_runtime_settings(partial_settings: dict[str, object]) -> dict[str, object]:
     merged = _runtime_settings_from_file_only()
 
-    for key in ["enable_lookup", "enable_translate", "enable_audio", "hide_home_settings_button"]:
+    for key in [
+        "enable_lookup",
+        "enable_translate",
+        "enable_audio",
+        "hide_home_settings_button",
+    ]:
         if key in partial_settings:
             merged[key] = _coerce_bool(partial_settings[key], bool(merged[key]))
 
-    if "auto_play_audio_mode" in partial_settings or "auto_play_audio" in partial_settings:
+    if (
+        "auto_play_audio_mode" in partial_settings
+        or "auto_play_audio" in partial_settings
+    ):
         merged["auto_play_audio_mode"] = _normalize_auto_play_audio_mode(
             partial_settings.get("auto_play_audio_mode"),
             partial_settings.get("auto_play_audio"),
@@ -432,7 +521,9 @@ def _save_runtime_settings(partial_settings: dict[str, object]) -> dict[str, obj
         )
 
     if "popover_shortcut" in partial_settings:
-        merged["popover_shortcut"] = _normalize_shortcut(partial_settings["popover_shortcut"])
+        merged["popover_shortcut"] = _normalize_shortcut(
+            partial_settings["popover_shortcut"]
+        )
 
     if "popover_open_panel_mode" in partial_settings:
         merged["popover_open_panel_mode"] = _normalize_panel_open_mode(
@@ -440,8 +531,10 @@ def _save_runtime_settings(partial_settings: dict[str, object]) -> dict[str, obj
         )
 
     if "popover_definition_language_mode" in partial_settings:
-        merged["popover_definition_language_mode"] = _normalize_definition_language_mode(
-            partial_settings["popover_definition_language_mode"]
+        merged["popover_definition_language_mode"] = (
+            _normalize_definition_language_mode(
+                partial_settings["popover_definition_language_mode"]
+            )
         )
 
     return merged
@@ -463,6 +556,16 @@ def _build_settings_payload() -> dict:
     }
 
 
+def _build_runtime_bootstrap_payload() -> dict[str, object]:
+    runtime_settings = _runtime_settings_from_file_only()
+    return {
+        "hide_home_settings_button": _coerce_bool(
+            runtime_settings.get("hide_home_settings_button"),
+            bool(DEFAULT_RUNTIME_SETTINGS["hide_home_settings_button"]),
+        ),
+    }
+
+
 def _load_translation_config() -> dict[str, str]:
     config_path = ADDON_DIR / "config.json"
     defaults = {"source_language": "auto", "target_language": "vi"}
@@ -479,8 +582,12 @@ def _load_translation_config() -> dict[str, str]:
         return defaults
 
     return {
-        "source_language": str(payload.get("source_language", defaults["source_language"])),
-        "target_language": str(payload.get("target_language", defaults["target_language"])),
+        "source_language": str(
+            payload.get("source_language", defaults["source_language"])
+        ),
+        "target_language": str(
+            payload.get("target_language", defaults["target_language"])
+        ),
     }
 
 
@@ -493,7 +600,7 @@ def _save_translation_config(source_language: str, target_language: str) -> None
     try:
         _write_raw_config_file(current_payload)
     except Exception as error:
-        print(f"[{ADDON_MODULE}] Cannot save translation config: {error}")
+        _runtime_log(f"Cannot save translation config: {error}")
 
 
 def _save_runtime_settings_to_config_file(runtime_settings: dict[str, object]) -> None:
@@ -506,7 +613,7 @@ def _save_runtime_settings_to_config_file(runtime_settings: dict[str, object]) -
     try:
         _write_raw_config_file(payload)
     except Exception as error:
-        print(f"[{ADDON_MODULE}] Cannot mirror runtime settings to config file: {error}")
+        _runtime_log(f"Cannot mirror runtime settings to config file: {error}")
 
 
 def _save_all_settings_to_config_file(
@@ -530,7 +637,7 @@ def _save_all_settings_to_config_file(
         return (True, "")
     except Exception as error:
         message = f"Cannot save combined settings to config file: {error}"
-        print(f"[{ADDON_MODULE}] {message}")
+        _runtime_log(message)
         return (False, message)
 
 
@@ -540,7 +647,20 @@ def _save_runtime_settings_to_addon_config(runtime_settings: dict[str, object]) 
     try:
         mw.addonManager.writeConfig(__name__, config)
     except Exception as error:
-        print(f"[{ADDON_MODULE}] Cannot mirror runtime settings to addon config: {error}")
+        _runtime_log(f"Cannot mirror runtime settings to addon config: {error}")
+
+
+def _is_runtime_logging_enabled() -> bool:
+    raw = _load_raw_config_file()
+    debug_panel = _coerce_bool(raw.get("debug_panel_always_visible"), False)
+    install_ping_disabled = _coerce_bool(raw.get("disable_install_ping"), False)
+    return debug_panel and install_ping_disabled
+
+
+def _runtime_log(message: str) -> None:
+    if not _is_runtime_logging_enabled():
+        return
+    print(f"[{ADDON_MODULE}] {message}")
 
 
 def _is_debug_panel_always_visible() -> bool:
@@ -572,7 +692,7 @@ def _send_to_webview(context: object, payload: dict) -> None:
             if getattr(mw, "web", None) is not None:
                 mw.web.eval(js)
         except Exception as error:
-            print(f"[{ADDON_MODULE}] Cannot update webview: {error}")
+            _runtime_log(f"Cannot update webview: {error}")
 
     taskman = getattr(mw, "taskman", None)
     if taskman is not None:
@@ -587,11 +707,15 @@ def on_card_show(html: str, card, context) -> str:
     debug_flag = "true" if _is_debug_panel_always_visible() else "false"
     addon_web_id_json = json.dumps(str(ADDON_WEB_ID), ensure_ascii=False)
     addon_version_json = json.dumps(str(ADDON_VERSION), ensure_ascii=False)
+    runtime_bootstrap_json = json.dumps(
+        _build_runtime_bootstrap_payload(), ensure_ascii=False
+    )
     context_flag_tag = (
         "<script>window.__aplIsDeckBrowser=false;"
         f"window.__aplDebugPanelAlwaysVisible={debug_flag};"
         f"window.__aplAddonWebId={addon_web_id_json};"
         f"window.__aplAddonVersion={addon_version_json};"
+        f"window.__aplRuntimeBootstrap={runtime_bootstrap_json};"
         "</script>"
     )
     js_tag = f"<script src='{ASSET_JS_PATH}'></script>"
@@ -624,11 +748,15 @@ def on_webview_will_set_content(web_content, context) -> None:
     debug_flag = "true" if _is_debug_panel_always_visible() else "false"
     addon_web_id_json = json.dumps(str(ADDON_WEB_ID), ensure_ascii=False)
     addon_version_json = json.dumps(str(ADDON_VERSION), ensure_ascii=False)
+    runtime_bootstrap_json = json.dumps(
+        _build_runtime_bootstrap_payload(), ensure_ascii=False
+    )
     context_flag_tag = (
         "<script>window.__aplIsDeckBrowser=true;"
         f"window.__aplDebugPanelAlwaysVisible={debug_flag};"
         f"window.__aplAddonWebId={addon_web_id_json};"
         f"window.__aplAddonVersion={addon_version_json};"
+        f"window.__aplRuntimeBootstrap={runtime_bootstrap_json};"
         "</script>"
     )
     if isinstance(head_content, str) and context_flag_tag not in head_content:
@@ -682,7 +810,9 @@ def _coerce_int(value: object, default: int) -> int:
         return int(default)
 
 
-def _load_json_from_url(url: str, timeout_seconds: float = IMAGE_SEARCH_TIMEOUT_SECONDS) -> dict[str, object]:
+def _load_json_from_url(
+    url: str, timeout_seconds: float = IMAGE_SEARCH_TIMEOUT_SECONDS
+) -> dict[str, object]:
     request = Request(
         url,
         headers={
@@ -696,7 +826,10 @@ def _load_json_from_url(url: str, timeout_seconds: float = IMAGE_SEARCH_TIMEOUT_
         encoding = "utf-8"
         content_type = str(response.headers.get("Content-Type", ""))
         if "charset=" in content_type:
-            encoding = content_type.split("charset=", 1)[-1].split(";", 1)[0].strip() or "utf-8"
+            encoding = (
+                content_type.split("charset=", 1)[-1].split(";", 1)[0].strip()
+                or "utf-8"
+            )
         payload = json.loads(raw.decode(encoding, errors="replace"))
 
     if not isinstance(payload, dict):
@@ -751,13 +884,21 @@ def _duckduckgo_get_vqd(query: str) -> tuple[str, str]:
     return (vqd, "")
 
 
-def _duckduckgo_search_images(query: str, page: int, page_size: int) -> tuple[list[dict[str, str]], int | None, str]:
+def _duckduckgo_search_images(
+    query: str, page: int, page_size: int
+) -> tuple[list[dict[str, str]], int | None, str]:
     safe_query = _normalize_image_query(query)
     if not safe_query:
         return ([], None, "")
 
     safe_page = max(1, _coerce_int(page, 1))
-    safe_page_size = max(6, min(IMAGE_SEARCH_PAGE_SIZE_MAX, _coerce_int(page_size, IMAGE_SEARCH_PAGE_SIZE_DEFAULT)))
+    safe_page_size = max(
+        6,
+        min(
+            IMAGE_SEARCH_PAGE_SIZE_MAX,
+            _coerce_int(page_size, IMAGE_SEARCH_PAGE_SIZE_DEFAULT),
+        ),
+    )
     offset = (safe_page - 1) * safe_page_size
 
     vqd, token_error = _duckduckgo_get_vqd(safe_query)
@@ -807,7 +948,11 @@ def _duckduckgo_search_images(query: str, page: int, page_size: int) -> tuple[li
         if not src:
             continue
         page_url = str(item.get("url", "")).strip() or src
-        title = str(item.get("title", "")).strip() or str(item.get("source", "")).strip() or "Image"
+        title = (
+            str(item.get("title", "")).strip()
+            or str(item.get("source", "")).strip()
+            or "Image"
+        )
         options.append(
             {
                 "src": src,
@@ -822,7 +967,9 @@ def _duckduckgo_search_images(query: str, page: int, page_size: int) -> tuple[li
     return (options, next_page, "")
 
 
-def _google_cse_search_images(query: str, page: int, page_size: int) -> tuple[list[dict[str, str]], int | None, str]:
+def _google_cse_search_images(
+    query: str, page: int, page_size: int
+) -> tuple[list[dict[str, str]], int | None, str]:
     safe_query = _normalize_image_query(query)
     if not safe_query:
         return ([], None, "")
@@ -863,7 +1010,11 @@ def _google_cse_search_images(query: str, page: int, page_size: int) -> tuple[li
         err_payload = payload.get("error")
         if isinstance(err_payload, dict):
             message = str(err_payload.get("message", "")).strip()
-            return ([], None, f"google_cse_error: {message}" if message else "google_cse_error")
+            return (
+                [],
+                None,
+                f"google_cse_error: {message}" if message else "google_cse_error",
+            )
         return ([], None, "google_cse_error")
 
     items = payload.get("items")
@@ -902,13 +1053,21 @@ def _google_cse_search_images(query: str, page: int, page_size: int) -> tuple[li
     return (options, next_page, "")
 
 
-def _wikipedia_search_images(query: str, page: int, page_size: int) -> tuple[list[dict[str, str]], int | None, str]:
+def _wikipedia_search_images(
+    query: str, page: int, page_size: int
+) -> tuple[list[dict[str, str]], int | None, str]:
     safe_query = _normalize_image_query(query)
     if not safe_query:
         return ([], None, "")
 
     safe_page = max(1, _coerce_int(page, 1))
-    safe_page_size = max(6, min(IMAGE_SEARCH_PAGE_SIZE_MAX, _coerce_int(page_size, IMAGE_SEARCH_PAGE_SIZE_DEFAULT)))
+    safe_page_size = max(
+        6,
+        min(
+            IMAGE_SEARCH_PAGE_SIZE_MAX,
+            _coerce_int(page_size, IMAGE_SEARCH_PAGE_SIZE_DEFAULT),
+        ),
+    )
     offset = (safe_page - 1) * safe_page_size
 
     url = (
@@ -1046,7 +1205,9 @@ def _image_relevance_score(query: str, item: dict[str, str]) -> int:
     return score
 
 
-def _rank_image_options(query: str, options: list[dict[str, str]]) -> list[dict[str, str]]:
+def _rank_image_options(
+    query: str, options: list[dict[str, str]]
+) -> list[dict[str, str]]:
     scored: list[tuple[int, int, dict[str, str]]] = []
     for index, item in enumerate(options):
         score = _image_relevance_score(query, item)
@@ -1056,7 +1217,9 @@ def _rank_image_options(query: str, options: list[dict[str, str]]) -> list[dict[
     return [row[2] for row in scored]
 
 
-def _merge_image_options(primary: list[dict[str, str]], fallback: list[dict[str, str]]) -> list[dict[str, str]]:
+def _merge_image_options(
+    primary: list[dict[str, str]], fallback: list[dict[str, str]]
+) -> list[dict[str, str]]:
     output: list[dict[str, str]] = []
     seen: set[str] = set()
 
@@ -1093,7 +1256,13 @@ def _run_image_search_message(payload_raw: str, context: object) -> None:
     page = max(1, _coerce_int(payload.get("page", 1), 1))
     page_size = max(
         6,
-        min(IMAGE_SEARCH_PAGE_SIZE_MAX, _coerce_int(payload.get("page_size", IMAGE_SEARCH_PAGE_SIZE_DEFAULT), IMAGE_SEARCH_PAGE_SIZE_DEFAULT)),
+        min(
+            IMAGE_SEARCH_PAGE_SIZE_MAX,
+            _coerce_int(
+                payload.get("page_size", IMAGE_SEARCH_PAGE_SIZE_DEFAULT),
+                IMAGE_SEARCH_PAGE_SIZE_DEFAULT,
+            ),
+        ),
     )
     request_seq = max(0, _coerce_int(payload.get("request_seq", 0), 0))
 
@@ -1102,7 +1271,9 @@ def _run_image_search_message(payload_raw: str, context: object) -> None:
     errors: list[str] = []
 
     if query:
-        ddg_options, ddg_next_page, ddg_error = _duckduckgo_search_images(query, page, page_size)
+        ddg_options, ddg_next_page, ddg_error = _duckduckgo_search_images(
+            query, page, page_size
+        )
         if ddg_error:
             errors.append(ddg_error)
 
@@ -1124,7 +1295,9 @@ def _run_image_search_message(payload_raw: str, context: object) -> None:
                 next_page = google_next_page
 
         if not options:
-            wikipedia_options, wikipedia_next_page, wikipedia_error = _wikipedia_search_images(query, page, page_size)
+            wikipedia_options, wikipedia_next_page, wikipedia_error = (
+                _wikipedia_search_images(query, page, page_size)
+            )
             options = wikipedia_options
             next_page = wikipedia_next_page
             if wikipedia_error:
@@ -1169,7 +1342,7 @@ def _run_audio_message(audio_url: str, context: object) -> None:
 def _run_audio_stop_message() -> None:
     ok, message = _stop_native_audio_playback()
     if not ok and "no native stop api available" not in message.lower():
-        print(f"[{ADDON_MODULE}] Cannot stop native audio: {message}")
+        _runtime_log(f"Cannot stop native audio: {message}")
 
 
 def _play_audio_url_native(audio_url: str) -> tuple[bool, str]:
@@ -1357,8 +1530,12 @@ def on_js_message(handled, message: str, context):
         target_language: str | None = None
         incoming_languages = payload.get("languages", {})
         if isinstance(incoming_languages, dict):
-            source_language = str(incoming_languages.get("source_language", "auto") or "auto")
-            target_language = str(incoming_languages.get("target_language", "vi") or "vi")
+            source_language = str(
+                incoming_languages.get("source_language", "auto") or "auto"
+            )
+            target_language = str(
+                incoming_languages.get("target_language", "vi") or "vi"
+            )
 
         saved_settings = _save_runtime_settings(payload)
         saved_ok, save_message = _save_all_settings_to_config_file(
@@ -1378,7 +1555,11 @@ def on_js_message(handled, message: str, context):
             )
 
         persisted_payload = _build_settings_payload()
-        persisted_settings = persisted_payload.get("settings", {}) if isinstance(persisted_payload, dict) else {}
+        persisted_settings = (
+            persisted_payload.get("settings", {})
+            if isinstance(persisted_payload, dict)
+            else {}
+        )
         persisted_auto_play_mode = "off"
         if isinstance(persisted_settings, dict):
             persisted_auto_play_mode = _normalize_auto_play_audio_mode(
@@ -1400,14 +1581,16 @@ def on_js_message(handled, message: str, context):
             )
 
         if not saved_ok and save_message:
-            print(f"[{ADDON_MODULE}] save details: {save_message}")
+            _runtime_log(f"save details: {save_message}")
 
         _send_to_webview(
             context,
             {
                 "type": "settings_state",
                 "settings": persisted_payload.get("settings", {}),
-                "languages": persisted_payload.get("languages", _load_translation_config()),
+                "languages": persisted_payload.get(
+                    "languages", _load_translation_config()
+                ),
                 "resources": {
                     "mode": "api_only",
                     "status_unknown": False,

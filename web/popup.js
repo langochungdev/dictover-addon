@@ -37,6 +37,13 @@
   let lastAnchor = { x: 24, y: 24 };
   let pendingTimer = null;
   const debugLines = [];
+  const runtimeBootstrap =
+    window.__aplRuntimeBootstrap && typeof window.__aplRuntimeBootstrap === "object"
+      ? window.__aplRuntimeBootstrap
+      : {};
+  const initialHideHomeSettingsButton =
+    runtimeBootstrap.hide_home_settings_button === true ||
+    String(runtimeBootstrap.hide_home_settings_button || "").trim().toLowerCase() === "true";
 
   const toolSettings = {
     enable_lookup: true,
@@ -50,7 +57,7 @@
       trigger_mode: "auto",
       shortcut_combo: "Shift",
       auto_play_audio_mode: "off",
-      hide_home_settings_button: false,
+      hide_home_settings_button: initialHideHomeSettingsButton,
       panel_open_mode: "none",
       definition_language_mode: "output",
     },
@@ -385,6 +392,10 @@
   }
 
   function pushDebug(line) {
+    if (!DEBUG_PANEL_ALWAYS_VISIBLE) {
+      return;
+    }
+
     const record = "[" + now() + "] " + line;
     debugLines.push(record);
     if (debugLines.length > 120) {
@@ -2339,6 +2350,7 @@
     }
 
     if (settingsState.popover.hide_home_settings_button) {
+      settingsTriggerEl.classList.add("apl-settings-trigger--hidden");
       settingsTriggerEl.style.display = "none";
       return;
     }
@@ -2353,6 +2365,7 @@
     }
 
     if (settingsState.popover.hide_home_settings_button) {
+      settingsTriggerEl.classList.add("apl-settings-trigger--hidden");
       settingsTriggerEl.style.display = "none";
       return;
     }
@@ -2366,6 +2379,11 @@
     }
 
     if (settingsState.popover.hide_home_settings_button) {
+      if (settingsTriggerHideTimerId !== null) {
+        window.clearTimeout(settingsTriggerHideTimerId);
+        settingsTriggerHideTimerId = null;
+      }
+      settingsTriggerEl.classList.add("apl-settings-trigger--hidden");
       settingsTriggerEl.style.display = "none";
       return;
     }
@@ -2494,6 +2512,10 @@
     trigger.id = "apl-settings-trigger";
     trigger.className = "apl-settings-trigger";
     trigger.type = "button";
+    if (settingsState.popover.hide_home_settings_button) {
+      trigger.style.display = "none";
+      trigger.classList.add("apl-settings-trigger--hidden");
+    }
     configureSettingsTriggerButton(trigger);
 
     trigger.addEventListener("click", function () {
