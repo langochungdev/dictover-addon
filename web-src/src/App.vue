@@ -13,6 +13,8 @@ import ImageSubPanel from './components/popover/ImageSubPanel.vue'
 const settingsStore = useSettingsStore()
 const popoverStore = usePopoverStore()
 
+const isDeckBrowser = (window as any).__aplIsDeckBrowser !== false
+
 // --- End Debug Logger ---
 
 let selectionTimeout: any = null
@@ -93,7 +95,7 @@ onUnmounted(() => {
 
     <!-- Home Settings Trigger -->
     <button 
-      v-if="!settingsStore.popover.hide_home_settings_button"
+      v-if="!settingsStore.popover.hide_home_settings_button && isDeckBrowser"
       class="apl-settings-trigger" 
       @click="settingsStore.toggleModal"
       aria-label="Open settings"
