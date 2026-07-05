@@ -1,0 +1,210 @@
+<script setup lang="ts">
+import { computed, ref, watch, nextTick } from 'vue'
+import { usePopoverStore } from '../../stores/popover.store'
+import { useSettingsStore } from '../../stores/settings.store'
+import { pycmdService } from '../../services/pycmd.service'
+
+const store = usePopoverStore()
+const settingsStore = useSettingsStore()
+const popoverRef = ref<HTMLElement | null>(null)
+
+const popoverStyle = ref({
+  top: '-9999px',
+  left: '-9999px',
+  transform: 'none'
+})
+
+watch([() => store.isVisible, () => store.rect], async ([isVisible, rect]) => {
+  if (isVisible && rect) {
+    await nextTick()
+    if (!popoverRef.value) return
+    const el = popoverRef.value
+    const margin = 12
+    const width = el.offsetWidth || 320
+    const height = el.offsetHeight || 220
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
+    const offset = 10
+
+    const x = rect.left + rect.width / 2
+
+    const roomBottom = viewportHeight - (rect.bottom + offset) - margin
+    const roomTop = rect.top - offset - margin
+
+    const vertical = roomBottom >= height || roomBottom >= roomTop ? "bottom" : "top"
+
+    let left = x - width / 2
+    let top = vertical === "bottom" ? rect.bottom + offset : rect.top - height - offset
+
+    const maxX = viewportWidth - width - margin
+    const maxY = viewportHeight - height - margin
+    left = Math.max(margin, Math.min(left, maxX))
+    top = Math.max(margin, Math.min(top, maxY))
+
+    popoverStyle.value = {
+      top: `${top}px`,
+      left: `${left}px`,
+      transform: 'none'
+    }
+  } else {
+    popoverStyle.value = { top: '-9999px', left: '-9999px', transform: 'none' }
+  }
+}, { immediate: true })
+
+function playAudio(url: string) {
+  pycmdService.send(`audio:play:${encodeURIComponent(url)}`)
+}
+
+function openSettings() {
+  store.hide()
+  settingsStore.toggleModal()
+}
+
+function openImagePanel() {
+  store.toggleImagePanel()
+  if (store.isImageOpen) {
+    store.imageResult = null // clear old results to show loading
+    const query = store.lookupResult?.type === 'translate' ? store.lookupResult.original : store.lookupResult?.word
+    if (query) {
+      pycmdService.send(`image:search:${encodeURIComponent(JSON.stringify({ query: query.trim(), page: 1, page_size: 24, request_seq: 1 }))}`)
+    }
+  }
+}
+
+// Removed toggleDetails function
+// Icons
+const AUDIO_ICON_SVG = `<svg class="apl-audio-icon" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><g fill="none" fill-rule="evenodd" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 8.5v4"/><path d="M8.5 6.5v9"/><path d="M10.5 9.5v2"/><path d="M12.5 7.5v6.814"/><path d="M14.5 4.5v12"/></g></svg>`
+const IMAGE_ICON_SVG = `<svg class="apl-image-icon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><rect x="2.8" y="4" width="14.4" height="12" rx="2"/><circle cx="7.2" cy="8" r="1.3"/><path d="M4.8 14l3.6-3.8 2.8 2.8 2.4-2.3 2.4 3.3"/></g></svg>`
+const SETTINGS_ICON_SVG = `<svg class="apl-settings-icon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M8.2 2.6h3.6l.5 2.1a5.6 5.6 0 0 1 1.2.7l2-.8 1.8 3.1-1.5 1.5c.1.4.1.8.1 1.2s0 .8-.1 1.2l1.5 1.5-1.8 3.1-2-.8a5.6 5.6 0 0 1-1.2.7l-.5 2.1H8.2l-.5-2.1a5.6 5.6 0 0 1-1.2-.7l-2 .8-1.8-3.1L4.2 12a6 6 0 0 1-.1-1.2c0-.4 0-.8.1-1.2L2.7 8.1l1.8-3.1 2 .8a5.6 5.6 0 0 1 1.2-.7zm1.8 5a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4z" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+
+// Computed helpers
+const pos = computed(() => {
+  const meanings = store.lookupResult?.meanings
+  if (!meanings || !meanings.length) return ''
+  const first = meanings[0].partOfSpeech || ''
+  return first.toLowerCase() === 'unknown' ? '' : first
+})
+
+const summaryMeaning = computed(() => {
+  const r = store.lookupResult
+  if (!r) return ''
+  // Try translated -> definition_display -> first english definition
+  return r.translated || r.definition_display || ''
+})
+
+const displayDefinition = computed(() => {
+  return store.lookupResult?.definition_display || ''
+})
+
+</script>
+
+<template>
+  <div class="popover-wrapper">
+    <div 
+      ref="popoverRef"
+      class="apl-popover" 
+      :style="popoverStyle" 
+      role="dialog" 
+      aria-live="polite"
+    >
+      <!-- Loading State -->
+      <div v-if="store.isLoading" class="apl-body apl-body--loading-only">
+        <div class="apl-loading" role="status" aria-live="polite" aria-label="Dang tra">
+          <span class="apl-loading-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+        </div>
+      </div>
+      
+      <!-- Error State -->
+      <template v-else-if="store.error">
+        <div class="apl-header">
+          <span>Lookup</span>
+        </div>
+        <div class="apl-body">
+          <div class="apl-error">{{ store.error }}</div>
+        </div>
+      </template>
+      
+      <!-- Translate Result -->
+      <template v-else-if="store.lookupResult && store.lookupResult.type === 'translate'">
+        <div :class="['apl-body', 'apl-translate-compact', { 'apl-translate-hover-actions': /\s/.test((store.lookupResult.original || '').trim()) }]">
+          <div class="apl-translate-vi apl-translate-vi--primary">
+            {{ store.lookupResult.translated }}
+          </div>
+          <div class="apl-inline-actions apl-translate-inline-actions">
+            <button 
+              class="apl-button apl-audio" 
+              type="button" 
+              aria-label="Play audio"
+              :disabled="!settingsStore.toolSettings.enable_audio"
+              @click="playAudio(store.lookupResult.audio_url)"
+              v-html="AUDIO_ICON_SVG"
+            ></button>
+            <button 
+              :class="['apl-button', 'apl-image-toggle', { 'apl-image-toggle--active': store.isImageOpen }]" 
+              type="button" 
+              aria-label="Open image panel" 
+              :aria-pressed="store.isImageOpen"
+              @click="openImagePanel"
+              v-html="IMAGE_ICON_SVG"
+            ></button>
+            <button 
+              class="apl-button apl-popover-settings apl-open-settings" 
+              type="button" 
+              aria-label="Open settings"
+              @click="openSettings"
+              v-html="SETTINGS_ICON_SVG"
+            ></button>
+          </div>
+        </div>
+      </template>
+      
+      <!-- Lookup Result -->
+      <template v-else-if="store.lookupResult && store.lookupResult.type === 'lookup'">
+        <div class="apl-body apl-lookup-compact">
+          <div class="apl-lookup-headerline">
+            <div class="apl-lookup-headertext">
+              <span class="apl-lookup-summary">{{ summaryMeaning }}</span>
+              <span v-if="store.lookupResult.phonetic" class="apl-lookup-phonetic-inline">{{ store.lookupResult.phonetic }}</span>
+              <span v-if="pos" class="apl-pos-inline">{{ pos }}</span>
+              
+              <div class="apl-inline-actions">
+                <button 
+                  class="apl-button apl-audio apl-audio-mini" 
+                  type="button" 
+                  aria-label="Play audio"
+                  :disabled="!settingsStore.toolSettings.enable_audio"
+                  @click="playAudio(store.lookupResult.audio_url)"
+                  v-html="AUDIO_ICON_SVG"
+                ></button>
+                <button 
+                  :class="['apl-button', 'apl-image-toggle', 'apl-audio-mini', { 'apl-image-toggle--active': store.isImageOpen }]" 
+                  type="button" 
+                  aria-label="Open image panel" 
+                  :aria-pressed="store.isImageOpen"
+                  @click="openImagePanel"
+                  v-html="IMAGE_ICON_SVG"
+                ></button>
+                <button 
+                  class="apl-button apl-popover-settings apl-audio-mini apl-open-settings" 
+                  type="button" 
+                  aria-label="Open settings"
+                  @click="openSettings"
+                  v-html="SETTINGS_ICON_SVG"
+                ></button>
+              </div>
+            </div>
+          </div>
+          
+          <button class="apl-lookup-definition-toggle" type="button" :aria-expanded="store.isDetailsOpen" @click="store.toggleDetails">
+            <span class="apl-definition-toggle-icon">{{ store.isDetailsOpen ? '−' : '+' }}</span>
+            <span class="apl-lookup-definition">{{ displayDefinition }}</span>
+          </button>
+        </div>
+      </template>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+/* Scoped styles can be added here if needed, but it should inherit global popup.css automatically */
+</style>

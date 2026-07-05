@@ -31,6 +31,7 @@ def _ignore_filter(_dir: str, names: list[str]) -> set[str]:
         "_vendor",
         "__pycache__",
         "tests",
+        "web-src",
     }
     return {name for name in names if name in ignored or name.endswith(".pyc")}
 
@@ -180,8 +181,38 @@ def _enable_local_debug_popup(target_root: Path) -> tuple[bool, str]:
         return False, str(error)
 
 
+def _build_frontend(source_root: Path) -> tuple[bool, str]:
+    web_src = source_root / "web-src"
+    if not web_src.exists():
+        return True, "No web-src found, skipping build"
+    
+    print(f"Building frontend in {web_src}...")
+    try:
+        # Use shell=True on Windows to resolve npm command
+        process = subprocess.run(
+            ["npm", "run", "build"],
+            cwd=str(web_src),
+            check=False,
+            capture_output=True,
+            text=True,
+            shell=True
+        )
+        if process.returncode != 0:
+            return False, f"npm build failed:\n{process.stdout}\n{process.stderr}"
+        return True, "Frontend built successfully"
+    except Exception as error:
+        return False, f"Failed to run npm build: {error}"
+
+
 def main() -> None:
     source_root = _workspace_root()
+    
+    build_ok, build_msg = _build_frontend(source_root)
+    if not build_ok:
+        print(build_msg)
+        return
+    print(build_msg)
+
     target_root = _addons21_dir() / _addon_folder_name(source_root)
     deploy_mode = "fresh"
     lock_warnings: list[str] = []

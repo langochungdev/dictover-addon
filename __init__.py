@@ -20,7 +20,8 @@ ADDON_DIR = Path(__file__).resolve().parent
 ADDON_PARENT_DIR = ADDON_DIR.parent
 ADDON_VENDOR_DIR = ADDON_DIR / "_vendor"
 ADDON_WEB_ID = mw.addonManager.addonFromModule(__name__) or ADDON_MODULE
-ASSET_VERSION = "20260404b"
+import time
+ASSET_VERSION = str(int(time.time()))
 ASSET_CSS_PATH = f"/_addons/{ADDON_WEB_ID}/web/popup.css?v={ASSET_VERSION}"
 ASSET_JS_PATH = f"/_addons/{ADDON_WEB_ID}/web/popup.js?v={ASSET_VERSION}"
 ADDON_MANIFEST_PATH = ADDON_DIR / "manifest.json"
@@ -74,6 +75,7 @@ DEFAULT_RUNTIME_SETTINGS = {
     "popover_shortcut": "Shift",
     "popover_open_panel_mode": "none",
     "popover_definition_language_mode": "output",
+    "popover_theme": "dark",
 }
 
 INSTALL_PING_URL = "https://langochung.me/api/ping/dictover"
@@ -481,6 +483,7 @@ def _runtime_settings_from_config(config: dict) -> dict[str, object]:
             if _get_value("popover_definition_language_mode") is not None
             else DEFAULT_RUNTIME_SETTINGS["popover_definition_language_mode"]
         ),
+        "popover_theme": _get_value("popover_theme") if _get_value("popover_theme") is not None else DEFAULT_RUNTIME_SETTINGS["popover_theme"],
     }
 
 
@@ -529,6 +532,9 @@ def _save_runtime_settings(partial_settings: dict[str, object]) -> dict[str, obj
         merged["popover_open_panel_mode"] = _normalize_panel_open_mode(
             partial_settings["popover_open_panel_mode"]
         )
+
+    if "popover_theme" in partial_settings:
+        merged["popover_theme"] = partial_settings["popover_theme"]
 
     if "popover_definition_language_mode" in partial_settings:
         merged["popover_definition_language_mode"] = (
