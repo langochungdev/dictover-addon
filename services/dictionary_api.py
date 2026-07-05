@@ -11,6 +11,12 @@ from urllib.request import Request, urlopen
 API_ENDPOINT = "https://api.dictionaryapi.dev/api/v2/entries/en"
 WIKTIONARY_ENDPOINT = "https://en.wiktionary.org/api/rest_v1/page/definition"
 WIKTIONARY_ACTION_ENDPOINT = "https://{domain}.wiktionary.org/w/api.php"
+NAVER_KOVI_ENDPOINT = "https://korean.dict.naver.com/api3/kovi/search"
+NAVER_KOVI_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+    "Referer": "https://korean.dict.naver.com/kovidict/",
+    "Accept": "application/json",
+}
 HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 WIKITEXT_TEMPLATE_PATTERN = re.compile(r"\{\{[^{}]*\}\}")
 WIKITEXT_LINK_WITH_LABEL_PATTERN = re.compile(r"\[\[[^\]|]+\|([^\]]+)\]\]")
@@ -91,6 +97,65 @@ def _fetch_dictionaryapi(word: str, timeout: int) -> list[dict]:
     if not isinstance(parsed, list) or not parsed:
         raise RuntimeError("Invalid dictionary response")
     return parsed
+
+
+def _fetch_naver_kovi(word: str, timeout: int) -> list[dict]:
+    url = f"{NAVER_KOVI_ENDPOINT}?query={quote(word)}&pageNo=1&numOfRows=5"
+    request = Request(url, headers=NAVER_KOVI_HEADERS)
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except HTTPError as error:
+        if error.code == 404:
+            raise LookupError("Word not found") from error
+        raise RuntimeError("Naver KOVI request failed") from error
+    except (URLError, TimeoutError, OSError) as error:
+        raise RuntimeError("Naver KOVI unavailable") from error
+
+    items = (
+        payload
+        .get("searchResultMap", {})
+        .get("searchResultListMap", {})
+        .get("WORD", {})
+        .get("items", [])
+    )
+    if not isinstance(items, list) or not items:
+        raise LookupError("Word not found")
+
+    first_item = items[0] if isinstance(items[0], dict) else {}
+    audio_url = ""
+    phonetic_list = first_item.get("searchPhoneticSymbolList") or []
+    if isinstance(phonetic_list, list):
+        for p in phonetic_list:
+            if isinstance(p, dict):
+                audio_url = str(p.get("symbolFile") or "").strip()
+                if audio_url:
+                    break
+
+    meanings: list[dict] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        for pos_group in item.get("meansCollector") or []:
+            if not isinstance(pos_group, dict):
+                continue
+            pos = str(pos_group.get("partOfSpeech2") or "").strip()
+            definitions: list[dict] = []
+            for m in pos_group.get("means") or []:
+                if not isinstance(m, dict):
+                    continue
+                meaning_text = _clean_text(str(m.get("value") or ""))
+                example_text = _clean_text(str(m.get("exampleOri") or ""))
+                if meaning_text:
+                    definitions.append({"definition": meaning_text, "example": example_text})
+            if definitions:
+                meanings.append({"partOfSpeech": pos, "definitions": definitions})
+
+    if not meanings:
+        raise LookupError("Word not found")
+
+    phonetics = [{"audio": audio_url}] if audio_url else []
+    return [{"word": word, "phonetics": phonetics, "meanings": meanings}]
 
 
 def _resolve_wiktionary_entries(
@@ -353,6 +418,9 @@ def fetch_definition(
 
     resolved_source = _normalize_source_language(source_language)
     normalized_for_dictionaryapi = normalized.lower()
+
+    if resolved_source == "ko":
+        return _fetch_naver_kovi(normalized, timeout)
 
     if resolved_source != "en":
         try:
