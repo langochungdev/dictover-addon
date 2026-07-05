@@ -40,11 +40,22 @@ export const useSettingsStore = defineStore('settings', () => {
     if (data.languages) {
       languages.value = { ...languages.value, ...data.languages }
     }
-    if (data.popover) {
-      popover.value = { ...popover.value, ...data.popover }
-    }
-    if (data.tool_settings) {
-      toolSettings.value = { ...toolSettings.value, ...data.tool_settings }
+    if (data.settings) {
+      popover.value = {
+        trigger_mode: data.settings.popover_trigger_mode ?? popover.value.trigger_mode,
+        shortcut_combo: data.settings.popover_shortcut ?? popover.value.shortcut_combo,
+        auto_play_audio_mode: data.settings.auto_play_audio_mode ?? popover.value.auto_play_audio_mode,
+        hide_home_settings_button: data.settings.hide_home_settings_button ?? popover.value.hide_home_settings_button,
+        theme: data.settings.popover_theme ?? popover.value.theme,
+        panel_open_mode: data.settings.popover_open_panel_mode ?? popover.value.panel_open_mode,
+        definition_language_mode: data.settings.popover_definition_language_mode ?? popover.value.definition_language_mode
+      }
+      
+      toolSettings.value = {
+        enable_lookup: data.settings.enable_lookup ?? toolSettings.value.enable_lookup,
+        enable_translate: data.settings.enable_translate ?? toolSettings.value.enable_translate,
+        enable_audio: data.settings.enable_audio ?? toolSettings.value.enable_audio
+      }
     }
     isLoaded.value = true
   }
