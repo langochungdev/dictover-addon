@@ -21,6 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [Unreleased]: https://github.com/OWNER/REPO/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/OWNER/REPO/releases/tag/v0.1.0
 
+## v0.7.0 (2026-07-05)
+
+### Feat
+
+- add Naver KOVI API integration for Korean word definitions
+- initialize Vue 3 application with Pinia for state management
+- update addon version and enhance runtime settings handling in popup.js
+- enhance cleanup function and update package name handling in build_release script
+
 ## v0.6.0 (2026-04-04)
 
 ### Feat
