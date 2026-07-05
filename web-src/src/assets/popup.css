@@ -1064,7 +1064,7 @@
 
 .apl-settings-language-row {
     display: flex;
-    align-items: end;
+    align-items: flex-end;
     gap: 8px;
 }
 
@@ -1094,10 +1094,12 @@
 }
 
 .apl-settings-swap-languages {
-    align-self: end;
+    align-self: flex-end;
+    flex: 0 0 auto;
     border-radius: 10px;
     min-width: 44px;
     padding: 7px 10px;
+    margin-bottom: 1px;
 }
 
 .apl-settings-radio {

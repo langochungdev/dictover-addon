@@ -48,7 +48,11 @@ function close() {
         <div class="apl-settings-header">
           <div class="apl-settings-brand">
             <a class="apl-settings-avatar-link" href="https://langochung.me" target="_blank">
-              <img class="apl-settings-avatar" src="https://langochung.me/avatar.jpg" alt="Avatar" />
+              <svg class="apl-settings-avatar" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="19" cy="19" r="19" fill="var(--accent)"/>
+                <circle cx="19" cy="15" r="6" fill="rgba(255,255,255,0.9)"/>
+                <ellipse cx="19" cy="30" rx="10" ry="7" fill="rgba(255,255,255,0.9)"/>
+              </svg>
             </a>
             <div class="apl-settings-brand-meta">
               <a class="apl-settings-site-link" href="https://langochung.me" target="_blank">langochung.me</a>
@@ -56,7 +60,7 @@ function close() {
               <span class="apl-settings-support-note">&lt;- báo lỗi và yêu cầu feature</span>
             </div>
           </div>
-          <button class="apl-button apl-settings-close" @click="close">✕</button>
+
         </div>
 
         <!-- Languages -->
