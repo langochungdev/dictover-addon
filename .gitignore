@@ -9,3 +9,5 @@ __pycache__/
 Thumbs.db
 dist/
 docs/
+tmp/
+.agents/AGENTS.md

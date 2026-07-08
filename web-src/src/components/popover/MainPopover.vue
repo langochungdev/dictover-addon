@@ -3,9 +3,11 @@ import { computed, ref, watch, nextTick } from 'vue'
 import { usePopoverStore } from '../../stores/popover.store'
 import { useSettingsStore } from '../../stores/settings.store'
 import { pycmdService } from '../../services/pycmd.service'
+import { useI18n } from '../../composables/useI18n'
 
 const store = usePopoverStore()
 const settingsStore = useSettingsStore()
+const { t } = useI18n()
 const popoverRef = ref<HTMLElement | null>(null)
 
 const popoverStyle = ref({
@@ -109,7 +111,7 @@ const displayDefinition = computed(() => {
     >
       <!-- Loading State -->
       <div v-if="store.isLoading" class="apl-body apl-body--loading-only">
-        <div class="apl-loading" role="status" aria-live="polite" aria-label="Dang tra">
+        <div class="apl-loading" role="status" aria-live="polite" :aria-label="t('Searching...')">
           <span class="apl-loading-dots" aria-hidden="true"><span></span><span></span><span></span></span>
         </div>
       </div>
@@ -117,7 +119,7 @@ const displayDefinition = computed(() => {
       <!-- Error State -->
       <template v-else-if="store.error">
         <div class="apl-header">
-          <span>Lookup</span>
+          <span>{{ t('Lookup') }}</span>
         </div>
         <div class="apl-body">
           <div class="apl-error">{{ store.error }}</div>
@@ -134,7 +136,7 @@ const displayDefinition = computed(() => {
             <button 
               class="apl-button apl-audio" 
               type="button" 
-              aria-label="Play audio"
+              :aria-label="t('Play audio')"
               :disabled="!settingsStore.toolSettings.enable_audio"
               @click="playAudio(store.lookupResult.audio_url)"
               v-html="AUDIO_ICON_SVG"
@@ -142,7 +144,7 @@ const displayDefinition = computed(() => {
             <button 
               :class="['apl-button', 'apl-image-toggle', { 'apl-image-toggle--active': store.isImageOpen }]" 
               type="button" 
-              aria-label="Open image panel" 
+              :aria-label="t('Open image panel')" 
               :aria-pressed="store.isImageOpen"
               @click="openImagePanel"
               v-html="IMAGE_ICON_SVG"
@@ -150,7 +152,7 @@ const displayDefinition = computed(() => {
             <button 
               class="apl-button apl-popover-settings apl-open-settings" 
               type="button" 
-              aria-label="Open settings"
+              :aria-label="t('Open settings')"
               @click="openSettings"
               v-html="SETTINGS_ICON_SVG"
             ></button>
@@ -171,7 +173,7 @@ const displayDefinition = computed(() => {
                 <button 
                   class="apl-button apl-audio apl-audio-mini" 
                   type="button" 
-                  aria-label="Play audio"
+                  :aria-label="t('Play audio')"
                   :disabled="!settingsStore.toolSettings.enable_audio"
                   @click="playAudio(store.lookupResult.audio_url)"
                   v-html="AUDIO_ICON_SVG"
@@ -179,7 +181,7 @@ const displayDefinition = computed(() => {
                 <button 
                   :class="['apl-button', 'apl-image-toggle', 'apl-audio-mini', { 'apl-image-toggle--active': store.isImageOpen }]" 
                   type="button" 
-                  aria-label="Open image panel" 
+                  :aria-label="t('Open image panel')" 
                   :aria-pressed="store.isImageOpen"
                   @click="openImagePanel"
                   v-html="IMAGE_ICON_SVG"
@@ -187,7 +189,7 @@ const displayDefinition = computed(() => {
                 <button 
                   class="apl-button apl-popover-settings apl-audio-mini apl-open-settings" 
                   type="button" 
-                  aria-label="Open settings"
+                  :aria-label="t('Open settings')"
                   @click="openSettings"
                   v-html="SETTINGS_ICON_SVG"
                 ></button>

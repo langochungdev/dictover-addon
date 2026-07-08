@@ -135,7 +135,7 @@
 
 .apl-popover {
     position: fixed;
-    z-index: 9999;
+    z-index: 2147483640 !important;
     display: inline-block;
     width: fit-content;
     max-width: min(560px, calc(100vw - 20px));
@@ -168,7 +168,7 @@
 
 .apl-subpanel {
     position: fixed;
-    z-index: 10001;
+    z-index: 2147483641 !important;
     width: min(440px, calc(100vw - 24px));
     max-height: var(--apl-subpanel-max-height, calc(100vh - 24px));
     overflow: hidden;
@@ -772,7 +772,7 @@
     position: fixed;
     right: 14px;
     bottom: 14px;
-    z-index: 10000;
+    z-index: 2147483642 !important;
     width: min(540px, calc(100vw - 24px));
     background: var(--surface);
     backdrop-filter: blur(12px) saturate(180%);
@@ -821,7 +821,7 @@
     position: fixed;
     right: 14px;
     top: 14px;
-    z-index: 10010;
+    z-index: 2147483643 !important;
     border: 1px solid var(--outline);
     border-radius: 999px;
     padding: 6px 12px;
@@ -857,7 +857,7 @@
 .apl-settings-root {
     position: fixed;
     inset: 0;
-    z-index: 10030;
+    z-index: 2147483647 !important;
     font-family: var(--font-family);
     font-size: 14px !important;
     line-height: 1.45 !important;
@@ -880,6 +880,7 @@
 .apl-settings-overlay {
     position: fixed;
     inset: 0;
+    z-index: 2147483647 !important;
     display: flex;
     align-items: center;
     justify-content: center;

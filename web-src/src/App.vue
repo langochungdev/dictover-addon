@@ -74,6 +74,31 @@ onMounted(() => {
       settingsStore.updateState(data)
     } else if (data.type === 'lookup' || data.type === 'translate' || data.type === 'error' || data.type === 'image_search_result') {
       popoverStore.show(data)
+      
+      if (data.type === 'lookup' || data.type === 'translate') {
+        // Auto play audio
+        const mode = settingsStore.popover.auto_play_audio_mode
+        if (mode === 'all' || (mode === 'word' && data.type === 'lookup')) {
+          if (data.audio_url && settingsStore.toolSettings.enable_audio) {
+            pycmdService.send(`audio:play:${encodeURIComponent(data.audio_url)}`)
+          }
+        }
+
+        // Auto open details
+        if (settingsStore.popover.panel_open_mode === 'details') {
+          popoverStore.isDetailsOpen = true
+        }
+
+        // Auto open images
+        if (settingsStore.popover.panel_open_mode === 'images') {
+          popoverStore.isImageOpen = true
+          const query = data.type === 'translate' ? data.original : data.word
+          if (query) {
+            popoverStore.imageResult = null
+            pycmdService.send(`image:search:${encodeURIComponent(JSON.stringify({ query: query.trim(), page: 1, page_size: 24, request_seq: 1 }))}`)
+          }
+        }
+      }
     }
   }
 

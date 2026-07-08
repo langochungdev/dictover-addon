@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue'
 import { usePopoverStore } from '../../stores/popover.store'
+import { useI18n } from '../../composables/useI18n'
 
 const store = usePopoverStore()
+const { t } = useI18n()
 const subPanelRef = ref<HTMLElement | null>(null)
 const computedStyle = ref({ top: '-9999px', left: '-9999px', transform: 'none' })
 
@@ -81,7 +83,7 @@ watch([() => store.isDetailsOpen, () => store.rect], async ([isOpen]) => {
             </div>
           </div>
         </template>
-        <div class="apl-error" v-else>Khong tim thay dinh nghia.</div>
+        <div class="apl-error" v-else>{{ t('No definition found.') }}</div>
       </div>
     </div>
   </div>
