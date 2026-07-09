@@ -12,13 +12,14 @@ export const useSettingsStore = defineStore('settings', () => {
   })
 
   const popover = ref({
-    trigger_mode: 'auto', // auto, shortcut, none
+    trigger_mode: 'auto',
     shortcut_combo: 'Shift',
-    auto_play_audio_mode: 'off', // off, word, always
+    auto_play_audio_mode: 'off',
     hide_home_settings_button: false,
-    theme: 'dark', // dark, light, auto
-    panel_open_mode: 'none', // none, definition, images
-    definition_language_mode: 'output' // output, target, input
+    theme: 'dark',
+    panel_open_mode: 'none',
+    definition_language_mode: 'output',
+    font_size_px: 0
   })
 
   const toolSettings = ref({
@@ -27,13 +28,21 @@ export const useSettingsStore = defineStore('settings', () => {
     enable_audio: true
   })
 
-  // Watch for theme changes and apply them globally
   watch(() => popover.value.theme, (newTheme) => {
     let actualTheme = newTheme
     if (newTheme === 'auto') {
       actualTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     }
     document.documentElement.setAttribute('data-theme', actualTheme)
+  }, { immediate: true })
+
+  watch(() => popover.value.font_size_px, (newPx) => {
+    if (!newPx || newPx === 0) {
+      document.documentElement.style.removeProperty('--apl-user-font-size')
+    } else {
+      const px = Math.min(40, Math.max(8, Number(newPx)))
+      document.documentElement.style.setProperty('--apl-user-font-size', `${px}px`)
+    }
   }, { immediate: true })
 
   function updateState(data: any) {
@@ -48,9 +57,10 @@ export const useSettingsStore = defineStore('settings', () => {
         hide_home_settings_button: data.settings.hide_home_settings_button ?? popover.value.hide_home_settings_button,
         theme: data.settings.popover_theme ?? popover.value.theme,
         panel_open_mode: data.settings.popover_open_panel_mode ?? popover.value.panel_open_mode,
-        definition_language_mode: data.settings.popover_definition_language_mode ?? popover.value.definition_language_mode
+        definition_language_mode: data.settings.popover_definition_language_mode ?? popover.value.definition_language_mode,
+        font_size_px: data.settings.popover_font_size_px ?? popover.value.font_size_px
       }
-      
+
       toolSettings.value = {
         enable_lookup: data.settings.enable_lookup ?? toolSettings.value.enable_lookup,
         enable_translate: data.settings.enable_translate ?? toolSettings.value.enable_translate,
@@ -78,6 +88,7 @@ export const useSettingsStore = defineStore('settings', () => {
         popover_shortcut: popover.value.shortcut_combo,
         popover_open_panel_mode: popover.value.panel_open_mode,
         popover_definition_language_mode: popover.value.definition_language_mode,
+        popover_font_size_px: popover.value.font_size_px,
         languages: {
           source_language: languages.value.source_language,
           target_language: languages.value.target_language,

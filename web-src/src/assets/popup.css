@@ -84,7 +84,7 @@
 
 .apl-popover,
 .apl-subpanel {
-    font-size: 1em !important;
+    font-size: var(--apl-user-font-size, inherit) !important;
     line-height: 1.2 !important;
     font-weight: 400 !important;
 }
@@ -149,7 +149,7 @@
     color: var(--primary-text);
     box-shadow: 0 14px 36px var(--shadow-deep);
     font-family: var(--font-family);
-    font-size: inherit !important;
+    font-size: var(--apl-user-font-size, inherit) !important;
     transform-origin: top left;
     overscroll-behavior: contain;
 }
@@ -1186,6 +1186,27 @@
     justify-content: flex-start;
     align-items: flex-start;
     padding-top: 0;
+}
+
+.apl-settings-field--font-size {
+    align-self: stretch;
+    margin-top: 12px;
+}
+
+.apl-settings-font-size-control {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+}
+
+.apl-settings-font-size-control select {
+    flex: 1;
+}
+
+.apl-settings-font-size-control input {
+    flex: 0 0 70px;
+    width: 70px;
 }
 
 .apl-settings-toggle--inline {

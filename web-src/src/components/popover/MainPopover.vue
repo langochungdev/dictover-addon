@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, nextTick } from 'vue'
+import { computed, ref, watch, nextTick, onMounted } from 'vue'
 import { usePopoverStore } from '../../stores/popover.store'
 import { useSettingsStore } from '../../stores/settings.store'
 import { pycmdService } from '../../services/pycmd.service'
@@ -53,6 +53,21 @@ watch([() => store.isVisible, () => store.rect], async ([isVisible, rect]) => {
   }
 }, { immediate: true })
 
+const popoverStyleText = computed(() => {
+  const px = settingsStore.popover.font_size_px
+  const fs = px && px > 0 ? `font-size: ${px}px !important;` : ''
+  return `top: ${popoverStyle.value.top}; left: ${popoverStyle.value.left}; transform: ${popoverStyle.value.transform}; ${fs}`
+})
+
+onMounted(() => {
+  const el = popoverRef.value
+  if (!el) {
+    console.log('[DictOver] MainPopover onMounted: popoverRef is null')
+    return
+  }
+  // We removed the deep debug logs to keep it clean
+})
+
 function playAudio(url: string) {
   pycmdService.send(`audio:play:${encodeURIComponent(url)}`)
 }
@@ -105,7 +120,7 @@ const displayDefinition = computed(() => {
     <div 
       ref="popoverRef"
       class="apl-popover" 
-      :style="popoverStyle" 
+      :style="popoverStyleText" 
       role="dialog" 
       aria-live="polite"
     >

@@ -76,6 +76,7 @@ DEFAULT_RUNTIME_SETTINGS = {
     "popover_open_panel_mode": "none",
     "popover_definition_language_mode": "output",
     "popover_theme": "dark",
+    "popover_font_size_px": 0,
 }
 
 INSTALL_PING_URL = "https://langochung.me/api/ping/dictover"
@@ -484,6 +485,7 @@ def _runtime_settings_from_config(config: dict) -> dict[str, object]:
             else DEFAULT_RUNTIME_SETTINGS["popover_definition_language_mode"]
         ),
         "popover_theme": _get_value("popover_theme") if _get_value("popover_theme") is not None else DEFAULT_RUNTIME_SETTINGS["popover_theme"],
+        "popover_font_size_px": int(_get_value("popover_font_size_px") or DEFAULT_RUNTIME_SETTINGS["popover_font_size_px"]),
     }
 
 
@@ -535,6 +537,16 @@ def _save_runtime_settings(partial_settings: dict[str, object]) -> dict[str, obj
 
     if "popover_theme" in partial_settings:
         merged["popover_theme"] = partial_settings["popover_theme"]
+
+    if "popover_font_size_px" in partial_settings:
+        try:
+            px = int(partial_settings["popover_font_size_px"])
+            if px == 0:
+                merged["popover_font_size_px"] = 0
+            else:
+                merged["popover_font_size_px"] = max(8, min(40, px))
+        except (TypeError, ValueError):
+            pass
 
     if "popover_definition_language_mode" in partial_settings:
         merged["popover_definition_language_mode"] = (

@@ -1,12 +1,20 @@
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import { usePopoverStore } from '../../stores/popover.store'
+import { useSettingsStore } from '../../stores/settings.store'
 import { useI18n } from '../../composables/useI18n'
 
 const store = usePopoverStore()
+const settingsStore = useSettingsStore()
 const { t } = useI18n()
 const subPanelRef = ref<HTMLElement | null>(null)
 const computedStyle = ref({ top: '-9999px', left: '-9999px', transform: 'none' })
+
+const computedStyleText = computed(() => {
+  const px = settingsStore.popover.font_size_px
+  const fs = px && px > 0 ? `font-size: ${px}px !important;` : ''
+  return `top: ${computedStyle.value.top}; left: ${computedStyle.value.left}; transform: ${computedStyle.value.transform}; ${fs}`
+})
 
 watch([() => store.isDetailsOpen, () => store.rect], async ([isOpen]) => {
   if (isOpen) {
@@ -69,7 +77,7 @@ watch([() => store.isDetailsOpen, () => store.rect], async ([isOpen]) => {
       class="apl-subpanel apl-subpanel--details" 
       role="dialog" 
       aria-modal="false"
-      :style="computedStyle"
+      :style="computedStyleText"
     >
       <div class="apl-subpanel-body">
         <template v-if="store.lookupResult?.meanings && store.lookupResult.meanings.length">

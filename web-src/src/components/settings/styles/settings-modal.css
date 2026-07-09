@@ -1,1 +1,40 @@
 /* Settings modal specific styles - mostly handled by global popup.css for now */
+
+.apl-settings-home-bottom-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.apl-settings-hide-btn-inline {
+    margin-top: 10px;
+}
+
+.apl-settings-field--font-size {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.apl-settings-font-size-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.apl-settings-select--font-size {
+    flex: 1;
+    min-width: 0;
+}
+
+.apl-settings-font-size-input {
+    width: 52px;
+    padding: 4px 6px;
+    border: 1px solid var(--outline);
+    border-radius: 6px;
+    background: var(--canvas);
+    color: var(--primary-text);
+    font-size: 0.9em;
+    text-align: center;
+}

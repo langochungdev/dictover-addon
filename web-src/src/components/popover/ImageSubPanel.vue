@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { usePopoverStore } from '../../stores/popover.store'
+import { useSettingsStore } from '../../stores/settings.store'
 
 const store = usePopoverStore()
+const settingsStore = useSettingsStore()
 const subPanelRef = ref<HTMLElement | null>(null)
 const computedStyle = ref({ top: '-9999px', left: '-9999px', transform: 'none' })
+
+const computedStyleText = computed(() => {
+  const px = settingsStore.popover.font_size_px
+  const fs = px && px > 0 ? `font-size: ${px}px !important;` : ''
+  return `top: ${computedStyle.value.top}; left: ${computedStyle.value.left}; transform: ${computedStyle.value.transform}; ${fs}`
+})
 
 const imageResult = computed(() => store.imageResult)
 
@@ -101,7 +109,7 @@ watch([() => store.isImageOpen, () => store.rect, () => store.imageResult], ([is
       class="apl-subpanel apl-subpanel--images" 
       role="dialog" 
       aria-modal="false"
-      :style="computedStyle"
+      :style="computedStyleText"
     >
       <div class="apl-subpanel-body apl-image-subpanel-body">
         <div class="apl-image-results">

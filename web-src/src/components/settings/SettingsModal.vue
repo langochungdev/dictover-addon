@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, watch, computed } from 'vue'
 import { useSettingsStore } from '../../stores/settings.store'
 import ThemeToggle from './ThemeToggle.vue'
 import { useI18n } from '../../composables/useI18n'
@@ -39,6 +40,43 @@ function handleSave() {
 
 function close() {
   store.toggleModal()
+}
+
+
+const FONT_SIZE_PRESETS = [16, 18, 20, 22, 24, 26, 28, 30]
+const isCustomMode = ref(false)
+
+watch(() => store.popover.font_size_px, (newPx) => {
+  if (newPx !== 0 && !FONT_SIZE_PRESETS.includes(Number(newPx))) {
+    isCustomMode.value = true
+  } else {
+    isCustomMode.value = false
+  }
+}, { immediate: true })
+
+const selectedFontSize = computed({
+  get() {
+    if (isCustomMode.value) return 'custom'
+    if (store.popover.font_size_px === 0) return 0
+    return store.popover.font_size_px
+  },
+  set(val: string | number) {
+    if (val === 'custom') {
+      isCustomMode.value = true
+    } else {
+      isCustomMode.value = false
+      store.popover.font_size_px = Number(val)
+      store.saveSettings()
+    }
+  }
+})
+
+function handleFontSizeInput(e: Event) {
+  if (!isCustomMode.value) return // Prevent blur/change on unmount from overriding Default selection
+  const val = Number((e.target as HTMLInputElement).value)
+  if (isNaN(val) || val < 8 || val > 40) return
+  store.popover.font_size_px = val
+  store.saveSettings()
 }
 </script>
 
@@ -161,19 +199,44 @@ function close() {
                 <input class="apl-settings-auto-play-audio-mode" type="radio" value="all" v-model="store.popover.auto_play_audio_mode" @change="handleSave" />
                 <span class="apl-settings-radio-label">{{ t('Everything') }}</span>
               </label>
+
+              <label class="apl-settings-toggle apl-settings-toggle--inline apl-settings-hide-btn-inline">
+                <input class="apl-settings-hide-home-settings-button" type="checkbox" v-model="store.popover.hide_home_settings_button" @change="handleSave" />
+                {{ t('Hide home settings button') }}
+              </label>
             </div>
             
             <div class="apl-settings-home-toggle-column">
               <div class="apl-settings-section-title">{{ t('Theme & Home') }}</div>
               <ThemeToggle @change="handleSave" />
               
-              <label class="apl-settings-toggle apl-settings-toggle--inline" style="margin-top: 14px;">
-                <input class="apl-settings-hide-home-settings-button" type="checkbox" v-model="store.popover.hide_home_settings_button" @change="handleSave" />
-                {{ t('Hide home settings button') }}
+              <label class="apl-settings-field apl-settings-field--font-size">
+                <span>{{ t('Text size') }}</span>
+                <div class="apl-settings-font-size-control">
+                  <select
+                    class="apl-settings-select apl-settings-select--font-size"
+                    v-model="selectedFontSize"
+                  >
+                    <option v-for="px in FONT_SIZE_PRESETS" :key="px" :value="px">{{ px }}px</option>
+                    <option value="custom">{{ t('Custom') }}</option>
+                    <option :value="0">{{ t('Default (follow card)') }}</option>
+                  </select>
+                  <input
+                    v-if="isCustomMode"
+                    class="apl-settings-font-size-input"
+                    type="number"
+                    min="8"
+                    max="40"
+                    placeholder="8-40"
+                    :value="store.popover.font_size_px !== 0 ? store.popover.font_size_px : ''"
+                    @change="handleFontSizeInput"
+                  />
+                </div>
               </label>
             </div>
           </div>
         </div>
+
 
       </div>
     </div>
