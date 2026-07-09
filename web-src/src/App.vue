@@ -19,6 +19,15 @@ const isDeckBrowser = (window as any).__aplIsDeckBrowser !== false
 
 let selectionTimeout: any = null
 
+function handleMouseDown(event: MouseEvent) {
+  const target = event.target as HTMLElement
+  if (target.closest('.apl-popover') || target.closest('.apl-settings-overlay') || target.closest('.debug-panel')) {
+    return
+  }
+  
+  popoverStore.hide()
+}
+
 function handleMouseUp(event: MouseEvent) {
   const target = event.target as HTMLElement
   if (target.closest('.apl-popover') || target.closest('.apl-settings-overlay') || target.closest('.debug-panel')) {
@@ -107,10 +116,12 @@ onMounted(() => {
   }, 100)
 
   document.addEventListener('mouseup', handleMouseUp)
+  document.addEventListener('mousedown', handleMouseDown)
 })
 
 onUnmounted(() => {
   document.removeEventListener('mouseup', handleMouseUp)
+  document.removeEventListener('mousedown', handleMouseDown)
 })
 </script>
 
