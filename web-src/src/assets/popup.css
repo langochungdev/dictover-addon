@@ -85,7 +85,7 @@
 .apl-popover,
 .apl-subpanel {
     font-size: 1em !important;
-    line-height: 1.45 !important;
+    line-height: 1.2 !important;
     font-weight: 400 !important;
 }
 
@@ -212,8 +212,8 @@
 }
 
 .apl-body {
-    padding: 5px 6px;
-    line-height: 1.45;
+    padding: 2px 6px;
+    line-height: 1.2;
 }
 
 .apl-body--loading-only {
@@ -338,7 +338,7 @@
 }
 
 .apl-translate-compact {
-    padding: 5px 6px;
+    padding: 2px 6px;
     text-align: left !important;
 }
 
@@ -376,7 +376,7 @@
 }
 
 .apl-lookup-compact {
-    padding: 5px 6px;
+    padding: 2px 6px;
 }
 
 .apl-lookup-headerline {
@@ -432,7 +432,7 @@
     font-family: var(--font-family);
     font-size: 1em !important;
     font-weight: 400 !important;
-    line-height: 1.45 !important;
+    line-height: 1.2 !important;
     text-transform: none !important;
     text-decoration: none !important;
     letter-spacing: normal !important;
@@ -467,7 +467,7 @@
     font-family: var(--font-family);
     font-size: 1em !important;
     font-weight: 400 !important;
-    line-height: 1.45 !important;
+    line-height: 1.2 !important;
     text-transform: none !important;
     text-decoration: none !important;
     letter-spacing: normal !important;
@@ -528,10 +528,9 @@
 }
 
 .apl-audio-icon {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     display: block;
-    transform: scale(1.2);
     transform-origin: center;
     transition: transform 120ms ease;
 }
@@ -541,14 +540,14 @@
 }
 
 .apl-image-icon {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     display: block;
 }
 
 .apl-settings-icon {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     display: block;
 }
 
