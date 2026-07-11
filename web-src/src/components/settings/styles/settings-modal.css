@@ -98,22 +98,47 @@
 .apl-settings-support-link {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted-text);
-    text-decoration: none;
-    padding: 4px 8px;
+    gap: 8px;
+    padding: 6px 10px;
     border-radius: 10px;
-    background: var(--surface-hover);
+    background: var(--surface);
     border: 1px solid var(--outline);
+    text-decoration: none;
     transition: all 0.2s ease;
+    flex: 0 0 auto;
 }
 
 .apl-settings-support-link:hover {
-    color: var(--accent);
+    background: var(--surface-hover);
     border-color: var(--accent);
-    background: var(--accent-bg);
+}
+
+.apl-settings-support-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+}
+
+.apl-settings-support-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.apl-settings-support-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary-text);
+    line-height: 1.2;
+}
+
+.apl-settings-support-author {
+    font-size: 11px;
+    color: var(--muted-text);
+    font-weight: 500;
+    line-height: 1.2;
 }
 
 /* Custom Radio Button styling to match UI Primary Color */
