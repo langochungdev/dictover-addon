@@ -12,7 +12,7 @@
   justify-content: space-between;
   gap: 10px;
   border: 1px solid var(--outline);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 7px 10px;
   color: var(--primary-text);
   background: var(--surface);
@@ -74,7 +74,7 @@
   left: 0;
   background: var(--surface);
   border: 1px solid var(--outline);
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 10px 24px var(--shadow-deep);
   z-index: 100;
   max-height: 200px;
@@ -117,7 +117,7 @@
 
 .custom-select-item {
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: 10px;
   color: var(--primary-text);
   font-size: 14px;
   cursor: pointer;

@@ -242,7 +242,7 @@
 
 .apl-button {
     border: 0;
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 5px 10px;
     background: var(--accent-bg);
     color: var(--accent);
@@ -303,7 +303,7 @@
 .apl-loading-dots span {
     width: 5px;
     height: 5px;
-    border-radius: 999px;
+    border-radius: 10px;
     background: var(--muted-text);
     opacity: 0.35;
     transform: translateY(0);
@@ -493,7 +493,7 @@
 }
 
 .apl-audio-mini {
-    border-radius: 999px;
+    border-radius: 10px;
     padding: 2px;
     min-width: 0;
     line-height: 1;
@@ -516,7 +516,7 @@
     color: var(--accent) !important;
     padding: 4px !important;
     box-sizing: border-box;
-    border-radius: 999px;
+    border-radius: 10px;
     box-shadow: none !important;
     transform: none !important;
     transition-property: color, filter !important;
@@ -552,7 +552,7 @@
 }
 
 .apl-image-toggle {
-    border-radius: 999px;
+    border-radius: 10px;
     padding: 3px;
     min-width: 0;
     width: 32px;
@@ -568,7 +568,7 @@
 }
 
 .apl-popover-settings {
-    border-radius: 999px;
+    border-radius: 10px;
     padding: 3px;
     min-width: 0;
     width: 32px;
@@ -723,7 +723,7 @@
 .apl-image-card {
     display: block;
     border: 1px solid var(--outline);
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     background: var(--surface-hover);
     text-decoration: none;
@@ -798,7 +798,7 @@
     width: 100%;
     min-height: 180px;
     border: 1px solid var(--outline);
-    border-radius: 8px;
+    border-radius: 10px;
     background: var(--surface-hover);
     color: #f8fafc;
     padding: 8px;
@@ -822,7 +822,7 @@
     top: 14px;
     z-index: 2147483643 !important;
     border: 1px solid var(--outline);
-    border-radius: 999px;
+    border-radius: 10px;
     padding: 6px 12px;
     display: inline-flex;
     align-items: center;
@@ -893,7 +893,7 @@
     width: min(520px, calc(100vw - 24px));
     max-height: min(84vh, 760px);
     overflow: auto;
-    border-radius: 14px;
+    border-radius: 10px;
     border: 1px solid var(--outline);
     background: var(--surface);
     backdrop-filter: blur(12px) saturate(180%);
@@ -937,7 +937,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 999px;
+    border-radius: 10px;
     text-decoration: none;
     flex: 0 0 auto;
 }
@@ -945,7 +945,7 @@
 .apl-settings-avatar {
     width: 38px;
     height: 38px;
-    border-radius: 999px;
+    border-radius: 10px;
     object-fit: cover;
     border: 1px solid var(--outline);
     flex: 0 0 auto;
@@ -1084,7 +1084,7 @@
 .apl-settings-field select,
 .apl-settings-field input {
     border: 1px solid var(--outline);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 7px 10px;
     color: var(--primary-text);
     background: var(--surface);
@@ -1359,7 +1359,7 @@
 .apl-settings-progress {
     margin-top: 8px;
     height: 8px;
-    border-radius: 999px;
+    border-radius: 10px;
     background: var(--outline);
     overflow: hidden;
 }
