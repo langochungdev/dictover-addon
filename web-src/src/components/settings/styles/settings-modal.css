@@ -30,7 +30,7 @@
     gap: 6px;
 }
 
-.apl-settings-font-size-control select.apl-settings-select--font-size {
+.apl-settings-font-size-control .apl-settings-select--font-size {
     flex: 0 0 auto;
     width: max-content;
     min-width: 0;

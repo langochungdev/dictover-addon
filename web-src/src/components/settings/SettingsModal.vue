@@ -2,6 +2,7 @@
 import { ref, watch, computed } from 'vue'
 import { useSettingsStore } from '../../stores/settings.store'
 import ThemeToggle from './ThemeToggle.vue'
+import CustomSelect from '../common/CustomSelect.vue'
 import { useI18n } from '../../composables/useI18n'
 
 const store = useSettingsStore()
@@ -19,6 +20,10 @@ const languages = [
   { code: 'de', name: 'German' },
   { code: 'fr', name: 'French' }
 ]
+
+const inputLanguageOptions = computed(() => languages.map(l => ({ value: l.code, label: t(l.name) })))
+const outputLanguageOptions = computed(() => languages.filter(l => l.code !== 'auto').map(l => ({ value: l.code, label: t(l.name) })))
+
 
 function swapLanguages() {
   const currentSrc = store.languages.source_language
@@ -44,6 +49,14 @@ function close() {
 
 
 const FONT_SIZE_PRESETS = [16, 18, 20, 22, 24, 26, 28, 30]
+
+const fontSizeOptions = computed(() => {
+  const opts: {value: string | number, label: string}[] = FONT_SIZE_PRESETS.map(px => ({ value: px, label: `${px}px` }))
+  opts.push({ value: 'custom', label: t('Custom') })
+  opts.push({ value: 0, label: t('Default') })
+  return opts
+})
+
 const isCustomMode = ref(false)
 
 watch(() => store.popover.font_size_px, (newPx) => {
@@ -101,16 +114,12 @@ function handleFontSizeInput(e: Event) {
           <div class="apl-settings-language-row">
             <label class="apl-settings-field">
               <span>{{ t('Input Language') }}</span>
-              <select class="apl-settings-select" v-model="store.languages.source_language" @change="handleSave">
-                <option v-for="lang in languages" :key="lang.code" :value="lang.code">{{ t(lang.name) }}</option>
-              </select>
+              <CustomSelect v-model="store.languages.source_language" :options="inputLanguageOptions" @change="handleSave" />
             </label>
             <button class="apl-button apl-settings-swap-languages" @click="swapLanguages">↔</button>
             <label class="apl-settings-field">
               <span>{{ t('Output Language') }}</span>
-              <select class="apl-settings-select" v-model="store.languages.target_language" @change="handleSave">
-                <option v-for="lang in languages.filter(l => l.code !== 'auto')" :key="lang.code" :value="lang.code">{{ t(lang.name) }}</option>
-              </select>
+              <CustomSelect v-model="store.languages.target_language" :options="outputLanguageOptions" @change="handleSave" />
             </label>
           </div>
         </div>
@@ -206,14 +215,12 @@ function handleFontSizeInput(e: Event) {
               <label class="apl-settings-field apl-settings-field--font-size">
                 <span>{{ t('Text size') }}</span>
                 <div class="apl-settings-font-size-control">
-                  <select
-                    class="apl-settings-select apl-settings-select--font-size"
+                  <CustomSelect
+                    class="apl-settings-select--font-size"
                     v-model="selectedFontSize"
-                  >
-                    <option v-for="px in FONT_SIZE_PRESETS" :key="px" :value="px">{{ px }}px</option>
-                    <option value="custom">{{ t('Custom') }}</option>
-                    <option :value="0">{{ t('Default') }}</option>
-                  </select>
+                    :options="fontSizeOptions"
+                    placement="top"
+                  />
                   <input
                     v-if="isCustomMode"
                     class="apl-settings-font-size-input"
