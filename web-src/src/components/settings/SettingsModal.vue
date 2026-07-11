@@ -12,13 +12,13 @@ const languages = [
   { code: 'auto', name: 'Auto' },
   { code: 'vi', name: 'Vietnamese' },
   { code: 'en', name: 'English' },
-  { code: 'ja', name: 'Japanese' },
-  { code: 'ko', name: 'Korean' },
   { code: 'zh-CN', name: 'Chinese' },
-  { code: 'ru', name: 'Russian' },
-  { code: 'fi', name: 'Finnish' },
+  { code: 'ko', name: 'Korean' },
+  { code: 'ja', name: 'Japanese' },
   { code: 'de', name: 'German' },
-  { code: 'fr', name: 'French' }
+  { code: 'fr', name: 'French' },
+  { code: 'fi', name: 'Finnish' },
+  { code: 'ru', name: 'Russian' }
 ]
 
 const inputLanguageOptions = computed(() => languages.map(l => ({ value: l.code, label: t(l.name) })))
@@ -31,7 +31,8 @@ function swapLanguages() {
   
   if (currentSrc === 'auto') {
     store.languages.source_language = currentTgt
-    store.languages.target_language = 'en'
+    // Find a logical target language instead of hardcoding 'en'
+    store.languages.target_language = currentTgt === 'vi' ? 'en' : 'vi'
   } else {
     store.languages.source_language = currentTgt
     store.languages.target_language = currentSrc
