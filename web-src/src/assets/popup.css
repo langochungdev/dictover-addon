@@ -144,7 +144,7 @@
     border: 1px solid var(--outline);
     border-radius: 10px;
     background: var(--surface);
-    backdrop-filter: blur(12px) saturate(180%);
+
 
     color: var(--primary-text);
     box-shadow: 0 14px 36px var(--shadow-deep);
@@ -175,7 +175,7 @@
     border: 1px solid var(--outline);
     border-radius: 10px;
     background: var(--surface);
-    backdrop-filter: blur(12px) saturate(180%);
+
 
     color: var(--primary-text);
     box-shadow: 0 16px 34px var(--shadow-deep);
@@ -774,7 +774,7 @@
     z-index: 2147483642 !important;
     width: min(540px, calc(100vw - 24px));
     background: var(--surface);
-    backdrop-filter: blur(12px) saturate(180%);
+
 
     color: #e2e8f0;
     border: 1px solid var(--outline);
@@ -828,7 +828,7 @@
     align-items: center;
     gap: 6px;
     background: var(--surface);
-    backdrop-filter: blur(12px) saturate(180%);
+
 
     color: var(--accent);
     font-size: 12px;
@@ -885,7 +885,6 @@
     justify-content: center;
     padding: 14px;
     background: rgba(0, 0, 0, 0.56);
-    backdrop-filter: blur(10px);
 }
 
 .apl-settings-modal {
@@ -896,7 +895,6 @@
     border-radius: 10px;
     border: 1px solid var(--outline);
     background: var(--surface);
-    backdrop-filter: blur(12px) saturate(180%);
 
     color: var(--primary-text);
     box-shadow: 0 20px 48px var(--shadow-deep);
@@ -1088,7 +1086,7 @@
     padding: 7px 10px;
     color: var(--primary-text);
     background: var(--surface);
-    backdrop-filter: blur(12px) saturate(180%);
+
 
     font-size: 14px;
 }
@@ -1336,7 +1334,7 @@
     border-radius: 10px;
     padding: 10px;
     background: var(--surface);
-    backdrop-filter: blur(12px) saturate(180%);
+
 
 }
 
@@ -1408,5 +1406,5 @@
 .apl-popover, .apl-subpanel, .apl-settings-modal {
     background: rgba(var(--surface-rgb), 0.85); /* fallback */
     background: var(--surface);
-    backdrop-filter: blur(12px) saturate(180%);
+
 }

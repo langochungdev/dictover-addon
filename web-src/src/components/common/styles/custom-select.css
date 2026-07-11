@@ -16,7 +16,7 @@
   padding: 7px 10px;
   color: var(--primary-text);
   background: var(--surface);
-  backdrop-filter: blur(12px) saturate(180%);
+
   font-size: 14px;
   cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s;
