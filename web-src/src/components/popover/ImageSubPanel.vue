@@ -3,84 +3,58 @@ import { computed, ref, watch } from 'vue'
 import { usePopoverStore } from '../../stores/popover.store'
 import { useSettingsStore } from '../../stores/settings.store'
 
+import { offset, flip, shift, size, useFloating, autoUpdate } from '@floating-ui/vue'
+
 const store = usePopoverStore()
 const settingsStore = useSettingsStore()
 const subPanelRef = ref<HTMLElement | null>(null)
-const computedStyle = ref({ top: '-9999px', left: '-9999px', transform: 'none' })
+const mainPopoverEl = ref<HTMLElement | null>(null)
+
+const imageResult = computed(() => store.imageResult)
+
+watch(() => store.isImageOpen, (isOpen: boolean) => {
+  if (isOpen) {
+    mainPopoverEl.value = document.querySelector('.apl-popover') as HTMLElement
+  } else {
+    mainPopoverEl.value = null
+  }
+}, { immediate: true })
+
+const { floatingStyles } = useFloating(mainPopoverEl, subPanelRef, {
+  placement: 'right-start',
+  strategy: 'fixed',
+  whileElementsMounted: autoUpdate,
+  middleware: [
+    offset(8),
+    flip({ fallbackPlacements: ['left-start', 'bottom', 'top'] }),
+    shift({ padding: 12 }),
+    size({
+      padding: 12,
+      apply({ availableWidth, availableHeight, elements }) {
+        Object.assign(elements.floating.style, {
+          maxWidth: `${Math.min(440, availableWidth)}px`,
+          maxHeight: `${availableHeight}px`
+        })
+      }
+    })
+  ],
+})
 
 const computedStyleText = computed(() => {
   const px = settingsStore.popover.font_size_px
   const fs = px && px > 0 ? `font-size: ${px}px !important;` : ''
-  return `top: ${computedStyle.value.top}; left: ${computedStyle.value.left}; transform: ${computedStyle.value.transform}; ${fs}`
-})
-
-const imageResult = computed(() => store.imageResult)
-
-watch([() => store.isImageOpen, () => store.rect, () => store.imageResult], ([isOpen]) => {
-  if (isOpen) {
-    if (!subPanelRef.value) return
-    const mainPopover = document.querySelector('.apl-popover') as HTMLElement
-    if (!mainPopover) return
-    
-    const mainRect = mainPopover.getBoundingClientRect()
-    // Always predict placement based on the full panel size to avoid jumping
-    // We get actual width/height or default to full panel max sizes
-    const viewportWidth = window.innerWidth
-    const viewportHeight = window.innerHeight
-    const margin = 12
-    const gap = 8
-    
-    // Estimate final width of the image panel to decide placement
-    const finalWidth = Math.min(440, viewportWidth - 24)
-    
-    let isLeftSide = false
-    if (mainRect.right + gap + finalWidth + margin > viewportWidth) {
-      isLeftSide = true
-    }
-    
-    const actualHeight = store.imageResult ? (subPanelRef.value?.offsetHeight || 360) : (subPanelRef.value?.offsetHeight || 46)
-    
-    let top = mainRect.top
-    // Prevent overflowing the bottom of the viewport
-    if (top + actualHeight + margin > viewportHeight) {
-      top = viewportHeight - actualHeight - margin
-    }
-    // Prevent overflowing the top of the viewport
-    if (top < margin) {
-      top = margin
-    }
-
-    const newStyle: Record<string, string> = {
-      top: `${top}px`,
-      transform: 'none',
-      left: 'auto',
-      right: 'auto'
-    }
-
-    // Force strict dimensions if it's the loader to ensure it's never huge
-    if (!store.imageResult) {
-      newStyle.width = 'max-content'
-      newStyle.height = 'max-content'
-      newStyle.minWidth = '40px'
-      newStyle.minHeight = '38px'
-    }
-
-    if (isLeftSide) {
-      // Pin to the right edge (which is left of the main popover)
-      const rightCoord = viewportWidth - mainRect.left + gap
-      newStyle.right = `${rightCoord}px`
-    } else {
-      // Pin to the left edge (which is right of the main popover)
-      let leftCoord = mainRect.right + gap
-      if (leftCoord < margin) leftCoord = margin
-      newStyle.left = `${leftCoord}px`
-    }
-
-    computedStyle.value = newStyle as any
-  } else {
-    computedStyle.value = { top: '-9999px', left: '-9999px', transform: 'none' } as any
+  
+  if (!store.isImageOpen) {
+    return `top: -9999px; left: -9999px; transform: none; ${fs}`
   }
-}, { immediate: true, flush: 'post' })
+
+  let extraStyles = ''
+  if (!store.imageResult) {
+    extraStyles = 'width: max-content; height: max-content; min-width: 40px; min-height: 38px;'
+  }
+
+  return `position: ${floatingStyles.value.position || 'fixed'}; top: ${floatingStyles.value.top || 0}; left: ${floatingStyles.value.left || 0}; transform: ${floatingStyles.value.transform || 'none'}; ${extraStyles} ${fs}`
+})
 
 </script>
 
@@ -92,7 +66,7 @@ watch([() => store.isImageOpen, () => store.rect, () => store.imageResult], ([is
       key="loader"
       ref="subPanelRef"
       class="apl-popover apl-image-preload-loader"
-      :style="computedStyle"
+      :style="computedStyleText"
     >
       <div class="apl-body apl-body--loading-only">
         <div class="apl-loading">

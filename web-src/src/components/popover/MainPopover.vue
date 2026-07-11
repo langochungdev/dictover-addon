@@ -1,62 +1,60 @@
 <script setup lang="ts">
-import { computed, ref, watch, nextTick, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { usePopoverStore } from '../../stores/popover.store'
 import { useSettingsStore } from '../../stores/settings.store'
 import { pycmdService } from '../../services/pycmd.service'
 import { useI18n } from '../../composables/useI18n'
+
+import { offset, flip, shift, size, useFloating, autoUpdate } from '@floating-ui/vue'
 
 const store = usePopoverStore()
 const settingsStore = useSettingsStore()
 const { t } = useI18n()
 const popoverRef = ref<HTMLElement | null>(null)
 
-const popoverStyle = ref({
-  top: '-9999px',
-  left: '-9999px',
-  transform: 'none'
+const virtualEl = computed(() => {
+  if (!store.rect || !store.isVisible) return null;
+  return {
+    getBoundingClientRect: () => ({
+      x: store.rect!.left,
+      y: store.rect!.top,
+      width: store.rect!.width,
+      height: store.rect!.height,
+      top: store.rect!.top,
+      left: store.rect!.left,
+      bottom: store.rect!.bottom,
+      right: store.rect!.right,
+    })
+  }
 })
 
-watch([() => store.isVisible, () => store.rect], async ([isVisible, rect]) => {
-  if (isVisible && rect) {
-    await nextTick()
-    if (!popoverRef.value) return
-    const el = popoverRef.value
-    const margin = 12
-    const width = el.offsetWidth || 320
-    const height = el.offsetHeight || 220
-    const viewportWidth = window.innerWidth
-    const viewportHeight = window.innerHeight
-    const offset = 10
-
-    const x = rect.left + rect.width / 2
-
-    const roomBottom = viewportHeight - (rect.bottom + offset) - margin
-    const roomTop = rect.top - offset - margin
-
-    const vertical = roomBottom >= height || roomBottom >= roomTop ? "bottom" : "top"
-
-    let left = x - width / 2
-    let top = vertical === "bottom" ? rect.bottom + offset : rect.top - height - offset
-
-    const maxX = viewportWidth - width - margin
-    const maxY = viewportHeight - height - margin
-    left = Math.max(margin, Math.min(left, maxX))
-    top = Math.max(margin, Math.min(top, maxY))
-
-    popoverStyle.value = {
-      top: `${top}px`,
-      left: `${left}px`,
-      transform: 'none'
-    }
-  } else {
-    popoverStyle.value = { top: '-9999px', left: '-9999px', transform: 'none' }
-  }
-}, { immediate: true })
+const { floatingStyles } = useFloating(virtualEl, popoverRef, {
+  placement: 'bottom',
+  strategy: 'fixed',
+  whileElementsMounted: autoUpdate,
+  middleware: [
+    offset(10),
+    flip(),
+    shift({ padding: 12 }),
+    size({
+      padding: 12,
+      apply({ availableWidth, availableHeight, elements }) {
+        Object.assign(elements.floating.style, {
+          maxWidth: `${Math.min(560, availableWidth)}px`,
+          maxHeight: `${Math.min(420, availableHeight)}px`
+        })
+      }
+    })
+  ],
+})
 
 const popoverStyleText = computed(() => {
   const px = settingsStore.popover.font_size_px
   const fs = px && px > 0 ? `font-size: ${px}px !important;` : ''
-  return `top: ${popoverStyle.value.top}; left: ${popoverStyle.value.left}; transform: ${popoverStyle.value.transform}; ${fs}`
+  if (!store.isVisible) {
+    return `top: -9999px; left: -9999px; transform: none; ${fs}`
+  }
+  return `position: ${floatingStyles.value.position || 'fixed'}; top: ${floatingStyles.value.top || 0}; left: ${floatingStyles.value.left || 0}; transform: ${floatingStyles.value.transform || 'none'}; ${fs}`
 })
 
 onMounted(() => {

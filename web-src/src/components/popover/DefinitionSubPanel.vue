@@ -1,72 +1,53 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, computed } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { usePopoverStore } from '../../stores/popover.store'
 import { useSettingsStore } from '../../stores/settings.store'
 import { useI18n } from '../../composables/useI18n'
+
+import { offset, flip, shift, size, useFloating, autoUpdate } from '@floating-ui/vue'
 
 const store = usePopoverStore()
 const settingsStore = useSettingsStore()
 const { t } = useI18n()
 const subPanelRef = ref<HTMLElement | null>(null)
-const computedStyle = ref({ top: '-9999px', left: '-9999px', transform: 'none' })
+const mainPopoverEl = ref<HTMLElement | null>(null)
+
+watch(() => store.isDetailsOpen, (isOpen: boolean) => {
+  if (isOpen) {
+    mainPopoverEl.value = document.querySelector('.apl-popover') as HTMLElement
+  } else {
+    mainPopoverEl.value = null
+  }
+}, { immediate: true })
+
+const { floatingStyles } = useFloating(mainPopoverEl, subPanelRef, {
+  placement: 'right-end',
+  strategy: 'fixed',
+  whileElementsMounted: autoUpdate,
+  middleware: [
+    offset(8),
+    flip({ fallbackPlacements: ['left-end', 'bottom', 'top'] }),
+    shift({ padding: 12 }),
+    size({
+      padding: 12,
+      apply({ availableWidth, availableHeight, elements }) {
+        Object.assign(elements.floating.style, {
+          maxWidth: `${Math.min(440, availableWidth)}px`,
+          maxHeight: `${availableHeight}px`
+        })
+      }
+    })
+  ],
+})
 
 const computedStyleText = computed(() => {
   const px = settingsStore.popover.font_size_px
   const fs = px && px > 0 ? `font-size: ${px}px !important;` : ''
-  return `top: ${computedStyle.value.top}; left: ${computedStyle.value.left}; transform: ${computedStyle.value.transform}; ${fs}`
-})
-
-watch([() => store.isDetailsOpen, () => store.rect], async ([isOpen]) => {
-  if (isOpen) {
-    await nextTick()
-    if (!subPanelRef.value) return
-    const el = subPanelRef.value
-    
-    // We get the main popover element from DOM
-    const mainPopover = document.querySelector('.apl-popover') as HTMLElement
-    if (!mainPopover) return
-    
-    const mainRect = mainPopover.getBoundingClientRect()
-    const width = el.offsetWidth || 300
-    const height = el.offsetHeight || 280
-    const gap = 8
-    
-    // Default placement: right-bottom of the main popover
-    let left = mainRect.right + gap
-    let top = mainRect.bottom - height
-    
-    const viewportWidth = window.innerWidth
-    const viewportHeight = window.innerHeight
-    const margin = 12
-    
-    // Check overflow and adjust
-    if (left + width + margin > viewportWidth) {
-      // Try left side
-      left = mainRect.left - width - gap
-    }
-    
-    if (top < margin) {
-      top = mainRect.top
-    }
-    
-    if (top + height + margin > viewportHeight) {
-      top = viewportHeight - height - margin
-    }
-    
-    // Ensure it doesn't go off-screen left
-    if (left < margin) {
-      left = margin
-    }
-
-    computedStyle.value = {
-      top: `${top}px`,
-      left: `${left}px`,
-      transform: 'none'
-    }
-  } else {
-    computedStyle.value = { top: '-9999px', left: '-9999px', transform: 'none' }
+  if (!store.isDetailsOpen) {
+    return `top: -9999px; left: -9999px; transform: none; ${fs}`
   }
-}, { immediate: true })
+  return `position: ${floatingStyles.value.position || 'fixed'}; top: ${floatingStyles.value.top || 0}; left: ${floatingStyles.value.left || 0}; transform: ${floatingStyles.value.transform || 'none'}; ${fs}`
+})
 
 </script>
 
