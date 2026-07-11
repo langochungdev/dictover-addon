@@ -5,6 +5,7 @@ version_scheme = "semver"
 tag_format = "v$version"
 version_files = [
   "manifest.json:version",
+  "web-src/package.json:version"
 ]
 changelog_file = "CHANGELOG.md"
 update_changelog_on_bump = true

@@ -8,6 +8,9 @@ import { useI18n } from '../../composables/useI18n'
 const store = useSettingsStore()
 const { t } = useI18n()
 
+declare const __APP_VERSION__: string;
+const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.7.0';
+
 const languages = [
   { code: 'auto', name: 'Auto' },
   { code: 'vi', name: 'Vietnamese' },
@@ -103,7 +106,7 @@ function handleFontSizeInput(e: Event) {
           <div class="apl-settings-title-group">
             <h1 class="apl-settings-title">
               DictOver 
-              <span class="apl-settings-version-badge">v0.6.0</span>
+              <span class="apl-settings-version-badge">v{{ version }}</span>
             </h1>
             <p class="apl-settings-subtitle">{{ t('Popup Dictionary Settings') }}</p>
           </div>
