@@ -1148,8 +1148,9 @@
 }
 
 .apl-settings-shortcut-input {
-    width: 50%;
-    min-width: 120px;
+    width: 25%;
+    min-width: 80px;
+    text-align: center;
 }
 
 .apl-settings-shortcut-input:disabled {
