@@ -422,7 +422,7 @@
 .apl-lookup-definition-toggle {
     all: unset;
     margin-top: 8px !important;
-    padding: 0;
+    padding: 0 0 0 20px !important;
     display: block;
     position: relative;
     width: 100%;
@@ -458,14 +458,13 @@
 .apl-lookup-definition {
     all: unset;
     margin-top: 0;
-    padding-top: 0;
+    padding: 0;
     min-width: 0;
     color: var(--primary-text);
     overflow-wrap: anywhere;
     white-space: normal;
     text-align: left;
     display: block;
-    text-indent: 16px;
     font-family: var(--font-family);
     font-size: 1em !important;
     font-weight: 400 !important;

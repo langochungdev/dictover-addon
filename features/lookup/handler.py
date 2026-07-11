@@ -243,19 +243,11 @@ def handle_lookup(word: str) -> dict[str, Any]:
 
         audio_url = tts_service.build_google_tts_url(normalized, lookup_language)
         return {
-            "type": "lookup",
-            "word": normalized,
+            "type": "translate",
+            "original": normalized,
             "translated": translated,
-            "phonetic": "",
             "audio_url": audio_url,
             "audio_lang": lookup_language,
-            "definition_display": translated,
-            "meanings": [
-                {
-                    "partOfSpeech": "",
-                    "definitions": [{"definition": translated, "example": ""}],
-                }
-            ],
         }
     except Exception:
         return {"type": "error", "message": "Khong the tra tu luc nay."}
