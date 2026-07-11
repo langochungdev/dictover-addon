@@ -119,13 +119,15 @@ def handle_translate(phrase: str) -> dict[str, str]:
             tts_language = "en"
 
     try:
-        translated = translation_service.translate_text(
+        translation_data = translation_service.translate_text_full(
             original,
-            source_language,
+            tts_language,
             target_language,
         )
+        translated = translation_data["translated"]
+        romanization = translation_data["romanization"]
     except Exception:
-        translated = "Khong the dich luc nay. Thu lai sau it giay."
+        return {"type": "error", "message": "Khong the dich doan van nay."}
 
     audio_url = tts_service.build_google_tts_url(original, tts_language)
 
@@ -133,6 +135,7 @@ def handle_translate(phrase: str) -> dict[str, str]:
         "type": "translate",
         "original": original,
         "translated": translated,
+        "phonetic": romanization,
         "audio_url": audio_url,
         "audio_lang": tts_language,
     }

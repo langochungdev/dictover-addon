@@ -111,6 +111,11 @@ const displayDefinition = computed(() => {
   return store.lookupResult?.definition_display || ''
 })
 
+const isShortTranslate = computed(() => {
+  const original = (store.lookupResult?.original || '').replace(/[\s，。！？、；：,\.!?;:]/g, '')
+  return original.length <= 2
+})
+
 </script>
 
 <template>
@@ -143,7 +148,17 @@ const displayDefinition = computed(() => {
       <template v-else-if="store.lookupResult && store.lookupResult.type === 'translate'">
         <div :class="['apl-body', 'apl-translate-compact', { 'apl-translate-hover-actions': /\s/.test((store.lookupResult.original || '').trim()) }]">
           <div class="apl-translate-vi apl-translate-vi--primary">
-            {{ store.lookupResult.translated }}
+            <span class="apl-translate-text">
+              {{ store.lookupResult.translated }}
+              <span
+                v-if="store.lookupResult.phonetic && isShortTranslate"
+                class="apl-translate-phonetic-inline"
+              >{{ store.lookupResult.phonetic }}</span>
+            </span>
+            <span
+              v-if="store.lookupResult.phonetic && !isShortTranslate"
+              class="apl-translate-phonetic-block"
+            >{{ store.lookupResult.phonetic }}</span>
           </div>
           <div class="apl-inline-actions apl-translate-inline-actions">
             <button 

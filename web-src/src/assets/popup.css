@@ -356,13 +356,35 @@
     color: var(--primary-text);
     word-break: break-word;
     text-align: left !important;
-    display: block;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
     width: 100%;
     align-self: stretch;
 }
 
 .apl-translate-vi--primary {
     margin-top: 0;
+}
+
+.apl-translate-phonetic-inline {
+    margin-left: 6px;
+    color: var(--secondary-text, #9ca3af);
+    font-size: 0.82em;
+    font-style: italic;
+    opacity: 0.85;
+}
+
+.apl-translate-phonetic-block {
+    display: block !important;
+    width: 100% !important;
+    color: var(--secondary-text, #9ca3af);
+    font-size: 0.82em;
+    font-style: italic;
+    opacity: 0.85;
+    margin-top: 2px;
+    padding-bottom: 2px;
+    text-align: left;
 }
 
 .apl-translate-hover-actions {

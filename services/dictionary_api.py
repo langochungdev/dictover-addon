@@ -26,6 +26,13 @@ AUDIO_TEMPLATE_PATTERN = re.compile(r"\{\{\s*audio\s*\|([^}]*)\}\}", re.IGNORECA
 MEDIA_FILENAME_PATTERN = re.compile(r"([^|{}]+\.(?:ogg|oga|mp3|wav))", re.IGNORECASE)
 REQUEST_RETRY_COUNT = 2
 REQUEST_RETRY_DELAY_SECONDS = 0.3
+ZH_WIKTIONARY_CHINESE_SECTIONS = {"漢語", "中文", "官話", "粵語"}
+ZH_STRUCTURAL_HEADINGS = {
+    "釋義", "字源", "發音", "組詞", "衍生字", "來源", "參見",
+    "派生詞", "漢字", "讀法", "詞源", "相關詞匯",
+}
+N_G_TEMPLATE_PATTERN = re.compile(r"\{\{n-g\|([^|}]+)[^}]*\}\}", re.IGNORECASE)
+ZH_STRUCTURAL_HEADING_PREFIX = ("詞源", "词源")
 LANGUAGE_TO_WIKTIONARY_KEY = {
     "en": "en",
     "zh-CN": "zh",
@@ -176,17 +183,13 @@ def _resolve_wiktionary_entries(
     if isinstance(parsed.get("en"), list) and parsed["en"]:
         return parsed["en"]
 
-    for key, value in parsed.items():
-        if key == "other":
-            continue
-        if isinstance(value, list) and value:
-            return value
-
     return []
 
 
 def _clean_wikitext_line(value: str) -> str:
     text = str(value or "")
+
+    text = N_G_TEMPLATE_PATTERN.sub(lambda m: m.group(1).strip(), text)
 
     while True:
         reduced = WIKITEXT_TEMPLATE_PATTERN.sub(" ", text)
@@ -279,6 +282,25 @@ def _extract_wiktionary_wikitext(payload: dict) -> str:
     return str(first_revision.get("*") or "")
 
 
+def _extract_zh_language_section(wikitext: str) -> str:
+    lines = wikitext.splitlines()
+    in_target = False
+    result: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        is_l2 = (
+            stripped.startswith("==")
+            and stripped.endswith("==")
+            and not stripped.startswith("===")
+        )
+        if is_l2:
+            heading = stripped.strip("= ")
+            in_target = heading in ZH_WIKTIONARY_CHINESE_SECTIONS
+        if in_target:
+            result.append(line)
+    return "\n".join(result)
+
+
 def _fetch_wiktionary_action(
     word: str, source_language: str, timeout: int
 ) -> list[dict]:
@@ -301,6 +323,11 @@ def _fetch_wiktionary_action(
     if not wikitext:
         raise LookupError("Word not found")
 
+    if domain == "zh":
+        wikitext = _extract_zh_language_section(wikitext)
+        if not wikitext:
+            raise LookupError("Word not found")
+
     audio_url = _extract_audio_url_from_wikitext(wikitext)
 
     meanings: list[dict] = []
@@ -320,7 +347,11 @@ def _fetch_wiktionary_action(
                 current_definitions = []
 
             heading = _clean_wikitext_line(line.strip("= "))
-            current_pos = heading or "unknown"
+            is_structural = (
+                heading in ZH_STRUCTURAL_HEADINGS
+                or any(heading.startswith(p) for p in ZH_STRUCTURAL_HEADING_PREFIX)
+            )
+            current_pos = "" if is_structural else (heading or "unknown")
             continue
 
         if line.startswith("#:") or line.startswith("#*") or line.startswith("#;"):
@@ -332,7 +363,14 @@ def _fetch_wiktionary_action(
         definition_text = _clean_wikitext_line(line.lstrip("# "))
         if not definition_text:
             continue
-        current_definitions.append({"definition": definition_text, "example": ""})
+        cjk_or_alpha = sum(
+            1 for ch in definition_text
+            if ch.isalpha() or ("\u4e00" <= ch <= "\u9fff")
+        )
+        if cjk_or_alpha < 2:
+            continue
+        if current_pos:
+            current_definitions.append({"definition": definition_text, "example": ""})
 
     if current_definitions:
         meanings.append(

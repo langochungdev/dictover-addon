@@ -64,6 +64,21 @@ LOOKUP_INPUT_MAX_LENGTH = 200
 _definition_translation_cache: dict[tuple[str, str, str], str] = {}
 _definition_translation_cache_lock = threading.Lock()
 
+CJK_IDEOGRAPH_RANGES = [
+    (0x4E00, 0x9FFF),
+    (0x3400, 0x4DBF),
+    (0x20000, 0x2A6DF),
+    (0xF900, 0xFAFF),
+]
+
+
+def _is_pure_cjk_ideograph(text: str) -> bool:
+    for ch in text:
+        cp = ord(ch)
+        if not any(lo <= cp <= hi for lo, hi in CJK_IDEOGRAPH_RANGES):
+            return False
+    return bool(text)
+
 
 def _normalize_source_language(value: object) -> str:
     code = str(value or "").strip()
@@ -171,6 +186,9 @@ def handle_lookup(word: str) -> dict[str, Any]:
         except Exception:
             lookup_language = "en"
 
+        if lookup_language == "ja" and _is_pure_cjk_ideograph(normalized):
+            lookup_language = "zh-CN"
+
     try:
         raw_data = dictionary_api.fetch_definition(
             normalized, source_language=lookup_language
@@ -188,11 +206,14 @@ def handle_lookup(word: str) -> dict[str, Any]:
             return {"type": "error", "message": "Khong tim thay tu nay."}
 
         try:
-            translated = translation_service.translate_text(
+            translation_data = translation_service.translate_text_full(
                 normalized, lookup_language, target_language
             )
+            translated = translation_data["translated"]
+            romanization = translation_data["romanization"]
         except Exception:
             translated = "Khong the dich nghia luc nay."
+            romanization = ""
 
         first_definition = _first_definition_text(parsed.get("meanings") or [])
         definition_target_language = target_language
@@ -222,7 +243,7 @@ def handle_lookup(word: str) -> dict[str, Any]:
             "type": "lookup",
             "word": parsed.get("word") or normalized,
             "translated": translated,
-            "phonetic": parsed.get("phonetic") or "",
+            "phonetic": parsed.get("phonetic") or romanization or "",
             "audio_url": audio_url,
             "audio_lang": lookup_language,
             "definition_display": definition_display,
@@ -230,13 +251,16 @@ def handle_lookup(word: str) -> dict[str, Any]:
         }
     except LookupError:
         try:
-            translated = translation_service.translate_text(
+            translation_data = translation_service.translate_text_full(
                 normalized,
                 lookup_language,
                 target_language,
-            ).strip()
+            )
+            translated = translation_data["translated"].strip()
+            romanization = translation_data["romanization"].strip()
         except Exception:
             translated = ""
+            romanization = ""
 
         if not translated:
             return {"type": "error", "message": "Khong tim thay tu nay."}
@@ -246,8 +270,32 @@ def handle_lookup(word: str) -> dict[str, Any]:
             "type": "translate",
             "original": normalized,
             "translated": translated,
+            "phonetic": romanization,
             "audio_url": audio_url,
             "audio_lang": lookup_language,
         }
     except Exception:
-        return {"type": "error", "message": "Khong the tra tu luc nay."}
+        try:
+            translation_data = translation_service.translate_text_full(
+                normalized,
+                lookup_language,
+                target_language,
+            )
+            translated = translation_data["translated"].strip()
+            romanization = translation_data["romanization"].strip()
+        except Exception:
+            translated = ""
+            romanization = ""
+
+        if not translated:
+            return {"type": "error", "message": "Khong the tra tu luc nay."}
+
+        audio_url = tts_service.build_google_tts_url(normalized, lookup_language)
+        return {
+            "type": "translate",
+            "original": normalized,
+            "translated": translated,
+            "phonetic": romanization,
+            "audio_url": audio_url,
+            "audio_lang": lookup_language,
+        }

@@ -58,7 +58,7 @@ def _translate_payload(text: str, source_language: str, target_language: str) ->
     query = quote(text)
     url = (
         "https://translate.googleapis.com/translate_a/single"
-        f"?client=gtx&sl={source_language}&tl={target_language}&dt=t&q={query}"
+        f"?client=gtx&sl={source_language}&tl={target_language}&dt=t&dt=rm&q={query}"
     )
 
     last_error: Exception | None = None
@@ -79,7 +79,7 @@ def _translate_payload(text: str, source_language: str, target_language: str) ->
     raise RuntimeError(f"online translator request failed: {last_error}")
 
 
-def _translate_online(text: str, source_language: str, target_language: str) -> str:
+def _translate_online_full(text: str, source_language: str, target_language: str) -> dict[str, str]:
     data = _translate_payload(text, source_language, target_language)
 
     segments = data[0]
@@ -87,15 +87,23 @@ def _translate_online(text: str, source_language: str, target_language: str) -> 
         raise RuntimeError("online translator returned an unexpected segment format")
 
     translated_parts: list[str] = []
+    romanization = ""
     for segment in segments:
-        if isinstance(segment, list) and segment and isinstance(segment[0], str):
-            translated_parts.append(segment[0])
+        if isinstance(segment, list) and segment:
+            if isinstance(segment[0], str):
+                translated_parts.append(segment[0])
+            elif len(segment) >= 4 and isinstance(segment[3], str) and segment[0] is None:
+                romanization = segment[3]
 
     translated_text = "".join(translated_parts).strip()
     if not translated_text:
         raise RuntimeError("online translator returned an empty translation")
 
-    return translated_text
+    return {"translated": translated_text, "romanization": romanization}
+
+
+def _translate_online(text: str, source_language: str, target_language: str) -> str:
+    return _translate_online_full(text, source_language, target_language)["translated"]
 
 
 def detect_language(text: str) -> str:
@@ -114,3 +122,12 @@ def translate_text(
         raise ValueError("Missing text")
 
     return _translate_online(text, source_language, target_language)
+
+
+def translate_text_full(
+    text: str, source_language: str = "en", target_language: str = "vi"
+) -> dict[str, str]:
+    if not (text or "").strip():
+        raise ValueError("Missing text")
+
+    return _translate_online_full(text, source_language, target_language)
