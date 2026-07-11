@@ -225,7 +225,7 @@ function handleFontSizeInput(e: Event) {
               <ThemeToggle @change="handleSave" />
               
               <label class="apl-settings-field apl-settings-field--font-size">
-                <span>{{ t('Text size') }}</span>
+                <div class="apl-settings-section-title">{{ t('Text size') }}</div>
                 <div class="apl-settings-font-size-control">
                   <CustomSelect
                     class="apl-settings-select--font-size"

@@ -241,7 +241,8 @@
 }
 
 .apl-button {
-    border: 0;
+    border: 0 !important;
+    outline: none !important;
     border-radius: 10px;
     padding: 5px 10px;
     background: var(--accent-bg);
@@ -251,7 +252,8 @@
 }
 
 .apl-close {
-    border: 0;
+    border: 0 !important;
+    outline: none !important;
     background: transparent;
     color: var(--muted-text);
     cursor: pointer;
@@ -1170,12 +1172,18 @@
 .apl-settings-audio-home-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: start;
+    align-items: stretch;
     gap: 8px 20px;
 }
 
 .apl-settings-audio-home-column {
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.apl-settings-hide-btn-inline {
+    margin-top: auto;
 }
 
 .apl-settings-home-toggle-column {
@@ -1189,7 +1197,7 @@
 
 .apl-settings-field--font-size {
     align-self: stretch;
-    margin-top: 12px;
+    margin-top: auto;
 }
 
 .apl-settings-font-size-control {
