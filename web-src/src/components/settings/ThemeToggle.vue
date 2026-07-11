@@ -13,10 +13,6 @@ function handleChange() {
 <template>
   <div class="theme-toggle-wrapper">
     <label class="apl-settings-radio">
-      <input class="apl-settings-theme" type="radio" value="auto" v-model="store.popover.theme" @change="handleChange" />
-      <span class="apl-settings-radio-label">System Default</span>
-    </label>
-    <label class="apl-settings-radio">
       <input class="apl-settings-theme" type="radio" value="dark" v-model="store.popover.theme" @change="handleChange" />
       <span class="apl-settings-radio-label">Dark Mode</span>
     </label>

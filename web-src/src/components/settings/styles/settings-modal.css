@@ -11,6 +11,13 @@
     margin-top: 10px;
 }
 
+.theme-toggle-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
 .apl-settings-field--font-size {
     display: flex;
     flex-direction: column;
@@ -23,8 +30,9 @@
     gap: 6px;
 }
 
-.apl-settings-select--font-size {
-    flex: 1;
+.apl-settings-font-size-control select.apl-settings-select--font-size {
+    flex: 0 0 auto;
+    width: max-content;
     min-width: 0;
 }
 
@@ -37,4 +45,109 @@
     color: var(--primary-text);
     font-size: 0.9em;
     text-align: center;
+}
+
+/* Professional Header Styles */
+.apl-settings-header--pro {
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    align-items: center;
+    border-bottom: 1px solid var(--outline);
+}
+
+.apl-settings-header--pro + .apl-settings-section {
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
+}
+
+.apl-settings-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.apl-settings-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1.2;
+}
+
+.apl-settings-version-badge {
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--accent-bg);
+    color: var(--accent);
+    padding: 2px 4px;
+    border-radius: 4px;
+    letter-spacing: 0;
+}
+
+.apl-settings-subtitle {
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted-text);
+    font-weight: 500;
+}
+
+.apl-settings-support-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted-text);
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: var(--surface-hover);
+    border: 1px solid var(--outline);
+    transition: all 0.2s ease;
+}
+
+.apl-settings-support-link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-bg);
+}
+
+/* Custom Radio Button styling to match UI Primary Color */
+.apl-settings-radio input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--outline);
+    border-radius: 50%;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    background: transparent;
+    flex-shrink: 0;
+}
+
+.apl-settings-radio input[type="radio"]:hover {
+    border-color: var(--accent);
+}
+
+.apl-settings-radio input[type="radio"]:checked {
+    border-color: var(--accent);
+}
+
+.apl-settings-radio input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
 }

@@ -85,22 +85,15 @@ function handleFontSizeInput(e: Event) {
     <div class="apl-settings-overlay" role="dialog" aria-modal="true" @mousedown.self="close">
       <div class="apl-settings-modal">
         <!-- Header -->
-        <div class="apl-settings-header">
-          <div class="apl-settings-brand">
-            <a class="apl-settings-avatar-link" href="https://langochung.me" target="_blank">
-              <svg class="apl-settings-avatar" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="19" cy="19" r="19" fill="var(--accent)"/>
-                <circle cx="19" cy="15" r="6" fill="rgba(255,255,255,0.9)"/>
-                <ellipse cx="19" cy="30" rx="10" ry="7" fill="rgba(255,255,255,0.9)"/>
-              </svg>
-            </a>
-            <div class="apl-settings-brand-meta">
-              <a class="apl-settings-site-link" href="https://langochung.me" target="_blank">langochung.me</a>
-              <span class="apl-settings-version">DictOver</span>
-              <span class="apl-settings-support-note">&lt;- báo lỗi và yêu cầu feature</span>
-            </div>
+        <div class="apl-settings-header apl-settings-header--pro">
+          <div class="apl-settings-title-group">
+            <h1 class="apl-settings-title">DictOver <span class="apl-settings-version-badge">v0.6.0</span></h1>
+            <p class="apl-settings-subtitle">{{ t('Popup Dictionary Settings') }}</p>
           </div>
-
+          <a class="apl-settings-support-link" href="https://langochung.me" target="_blank">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            <span>{{ t('Feedback & Support') }}</span>
+          </a>
         </div>
 
         <!-- Languages -->
@@ -219,7 +212,7 @@ function handleFontSizeInput(e: Event) {
                   >
                     <option v-for="px in FONT_SIZE_PRESETS" :key="px" :value="px">{{ px }}px</option>
                     <option value="custom">{{ t('Custom') }}</option>
-                    <option :value="0">{{ t('Default (follow card)') }}</option>
+                    <option :value="0">{{ t('Default') }}</option>
                   </select>
                   <input
                     v-if="isCustomMode"
@@ -243,6 +236,6 @@ function handleFontSizeInput(e: Event) {
   </div>
 </template>
 
-<style scoped>
+<style>
 @import './styles/settings-modal.css';
 </style>

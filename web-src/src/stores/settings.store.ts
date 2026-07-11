@@ -29,11 +29,11 @@ export const useSettingsStore = defineStore('settings', () => {
   })
 
   watch(() => popover.value.theme, (newTheme) => {
-    let actualTheme = newTheme
     if (newTheme === 'auto') {
-      actualTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      popover.value.theme = 'dark'
+      return
     }
-    document.documentElement.setAttribute('data-theme', actualTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
   }, { immediate: true })
 
   watch(() => popover.value.font_size_px, (newPx) => {

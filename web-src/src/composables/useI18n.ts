@@ -59,7 +59,7 @@ const translations: Record<string, Record<string, string>> = {
     'Off (Manual play)': 'Tắt (Phát âm thủ công)',
     'Single Words Only': 'Chỉ phát âm từ đơn',
     'Everything': 'Phát âm tất cả',
-    'Theme & Home': 'Giao diện & Trang chủ',
+    'Theme & Home': 'Giao diện',
     'Hide home settings button': 'Ẩn nút cài đặt ở trang chủ',
     'Lookup': 'Tra từ',
     'No definition found.': 'Không tìm thấy định nghĩa.',
