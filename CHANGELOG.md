@@ -21,6 +21,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [Unreleased]: https://github.com/OWNER/REPO/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/OWNER/REPO/releases/tag/v0.1.0
 
+## v0.8.0 (2026-07-12)
+
+### Feat
+
+- implement MainPopover component and sub-panels for dictionary lookup and image search features
+- implement popover UI component with theme-aware styling and structure
+- implement dictionary API service for Free Dictionary, Naver KOVI, and Wiktionary lookups
+- implement dictionary lookup and translation services with initial UI components
+- implement lookup feature UI components and backend handler
+- implement image search and display functionality via new sub-panel components
+- implement settings modal UI with custom theme, layout, and control styles
+- add styling and core popup functionality for the dictionary interface
+- add CSS styles and JavaScript logic for the popup interface
+- implement modular SettingsModal UI and build configuration for web-src
+- add popup style definitions and settings modal component structure
+- implement base styles and vue component for settings modal and add popup CSS injection functionality
+- implement new global design system styles and popup component structure
+- implement custom select component and integrate into new settings modal UI
+- implement settings infrastructure with persistent theme and font size controls
+- add popup CSS injection script and ignore temp directory
+- add settings UI and configure popover preferences for the extension
+- add popup CSS styles and JavaScript implementation for the extension UI
+- implement App component with selection-based popover trigger and inject CSS variables for consistent styling
+- implement settings modal, i18n, and core UI components for extension popup
+
 ## v0.7.0 (2026-07-05)
 
 ### Feat
