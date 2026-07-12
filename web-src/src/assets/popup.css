@@ -711,8 +711,14 @@
 
 .apl-subpanel--images {
     width: min(520px, calc(100vw - 24px));
+    min-width: 280px;
     height: var(--apl-subpanel-max-height, min(420px, calc(100vh - 24px)));
     max-height: min(420px, calc(100vh - 24px));
+}
+
+.apl-subpanel--details {
+    width: min(440px, calc(100vw - 24px));
+    min-width: 280px;
 }
 
 .apl-subpanel--pending {

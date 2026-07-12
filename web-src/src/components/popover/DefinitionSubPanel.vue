@@ -4,7 +4,7 @@ import { usePopoverStore } from '../../stores/popover.store'
 import { useSettingsStore } from '../../stores/settings.store'
 import { useI18n } from '../../composables/useI18n'
 
-import { offset, flip, shift, size, useFloating, autoUpdate } from '@floating-ui/vue'
+import { offset, flip, size, useFloating, autoUpdate } from '@floating-ui/vue'
 
 const store = usePopoverStore()
 const settingsStore = useSettingsStore()
@@ -20,20 +20,22 @@ watch(() => store.isDetailsOpen, (isOpen: boolean) => {
   }
 }, { immediate: true })
 
-const { floatingStyles } = useFloating(mainPopoverEl, subPanelRef, {
+useFloating(mainPopoverEl, subPanelRef, {
   placement: 'right-end',
   strategy: 'fixed',
   whileElementsMounted: autoUpdate,
   middleware: [
     offset(8),
-    flip({ fallbackPlacements: ['left-end', 'bottom', 'top'] }),
-    shift({ padding: 12 }),
+    flip({ fallbackPlacements: ['left-end', 'bottom', 'top'], fallbackStrategy: 'initialPlacement' }),
     size({
       padding: 12,
-      apply({ availableWidth, availableHeight, elements }) {
+      apply({ availableWidth, availableHeight, elements, x, y }) {
         Object.assign(elements.floating.style, {
           maxWidth: `${Math.min(440, availableWidth)}px`,
-          maxHeight: `${availableHeight}px`
+          maxHeight: `${availableHeight}px`,
+          top: `${y}px`,
+          left: `${x}px`,
+          transform: 'none'
         })
       }
     })
@@ -46,7 +48,7 @@ const computedStyleText = computed(() => {
   if (!store.isDetailsOpen) {
     return `top: -9999px; left: -9999px; transform: none; ${fs}`
   }
-  return `position: ${floatingStyles.value.position || 'fixed'}; top: ${floatingStyles.value.top || 0}; left: ${floatingStyles.value.left || 0}; transform: ${floatingStyles.value.transform || 'none'}; ${fs}`
+  return `position: fixed; ${fs}`
 })
 
 </script>

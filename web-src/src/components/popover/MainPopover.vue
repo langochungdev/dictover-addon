@@ -116,6 +116,8 @@ const isShortTranslate = computed(() => {
   return original.length <= 2
 })
 
+const isImageLoading = computed(() => store.isImageOpen && !store.imageResult)
+
 </script>
 
 <template>
@@ -175,8 +177,10 @@ const isShortTranslate = computed(() => {
               :aria-label="t('Open image panel')" 
               :aria-pressed="store.isImageOpen"
               @click="openImagePanel"
-              v-html="IMAGE_ICON_SVG"
-            ></button>
+            >
+              <span v-if="isImageLoading" class="apl-loading-dots apl-btn-loader"><span></span><span></span><span></span></span>
+              <span v-else class="apl-btn-icon" v-html="IMAGE_ICON_SVG"></span>
+            </button>
             <button 
               class="apl-button apl-popover-settings apl-open-settings" 
               type="button" 
@@ -212,8 +216,10 @@ const isShortTranslate = computed(() => {
                   :aria-label="t('Open image panel')" 
                   :aria-pressed="store.isImageOpen"
                   @click="openImagePanel"
-                  v-html="IMAGE_ICON_SVG"
-                ></button>
+                >
+                  <span v-if="isImageLoading" class="apl-loading-dots apl-btn-loader"><span></span><span></span><span></span></span>
+                  <span v-else class="apl-btn-icon" v-html="IMAGE_ICON_SVG"></span>
+                </button>
                 <button 
                   class="apl-button apl-popover-settings apl-audio-mini apl-open-settings" 
                   type="button" 

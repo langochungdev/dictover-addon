@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { usePopoverStore } from '../../stores/popover.store'
 import { useSettingsStore } from '../../stores/settings.store'
 
-import { offset, flip, shift, size, useFloating, autoUpdate } from '@floating-ui/vue'
+import { offset, flip, size, useFloating, autoUpdate } from '@floating-ui/vue'
 
 const store = usePopoverStore()
 const settingsStore = useSettingsStore()
@@ -20,20 +20,22 @@ watch(() => store.isImageOpen, (isOpen: boolean) => {
   }
 }, { immediate: true })
 
-const { floatingStyles } = useFloating(mainPopoverEl, subPanelRef, {
+useFloating(mainPopoverEl, subPanelRef, {
   placement: 'right-start',
   strategy: 'fixed',
   whileElementsMounted: autoUpdate,
   middleware: [
     offset(8),
-    flip({ fallbackPlacements: ['left-start', 'bottom', 'top'] }),
-    shift({ padding: 12 }),
+    flip({ fallbackPlacements: ['left-start', 'bottom', 'top'], fallbackStrategy: 'initialPlacement' }),
     size({
       padding: 12,
-      apply({ availableWidth, availableHeight, elements }) {
+      apply({ availableWidth, availableHeight, elements, x, y }) {
         Object.assign(elements.floating.style, {
-          maxWidth: `${Math.min(440, availableWidth)}px`,
-          maxHeight: `${availableHeight}px`
+          maxWidth: `${Math.min(520, availableWidth)}px`,
+          maxHeight: `${availableHeight}px`,
+          top: `${y}px`,
+          left: `${x}px`,
+          transform: 'none'
         })
       }
     })
@@ -53,31 +55,15 @@ const computedStyleText = computed(() => {
     extraStyles = 'width: max-content; height: max-content; min-width: 40px; min-height: 38px;'
   }
 
-  return `position: ${floatingStyles.value.position || 'fixed'}; top: ${floatingStyles.value.top || 0}; left: ${floatingStyles.value.left || 0}; transform: ${floatingStyles.value.transform || 'none'}; ${extraStyles} ${fs}`
+  return `position: fixed; ${extraStyles} ${fs}`
 })
 
 </script>
 
 <template>
-  <div v-if="store.isImageOpen">
-    <!-- Loader before images arrive -->
-    <div 
-      v-if="!imageResult"
-      key="loader"
-      ref="subPanelRef"
-      class="apl-popover apl-image-preload-loader"
-      :style="computedStyleText"
-    >
-      <div class="apl-body apl-body--loading-only">
-        <div class="apl-loading">
-          <span class="apl-loading-dots"><span></span><span></span><span></span></span>
-        </div>
-      </div>
-    </div>
-
+  <div v-if="store.isImageOpen && imageResult">
     <!-- Full Image Panel when images arrive -->
     <div 
-      v-else
       key="panel"
       ref="subPanelRef"
       class="apl-subpanel apl-subpanel--images" 
