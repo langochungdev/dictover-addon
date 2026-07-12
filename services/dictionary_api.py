@@ -18,6 +18,8 @@ NAVER_KOVI_HEADERS = {
     "Accept": "application/json",
 }
 HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
+STYLE_TAG_PATTERN = re.compile(r"<style[^>]*>.*?</style>", re.IGNORECASE | re.DOTALL)
+SCRIPT_TAG_PATTERN = re.compile(r"<script[^>]*>.*?</script>", re.IGNORECASE | re.DOTALL)
 WIKITEXT_TEMPLATE_PATTERN = re.compile(r"\{\{[^{}]*\}\}")
 WIKITEXT_LINK_WITH_LABEL_PATTERN = re.compile(r"\[\[[^\]|]+\|([^\]]+)\]\]")
 WIKITEXT_LINK_PATTERN = re.compile(r"\[\[([^\]]+)\]\]")
@@ -84,7 +86,9 @@ def _request_json(url: str, timeout: int) -> object:
 
 
 def _clean_text(value: str) -> str:
-    without_tags = HTML_TAG_PATTERN.sub("", value)
+    without_styles = STYLE_TAG_PATTERN.sub("", value)
+    without_scripts = SCRIPT_TAG_PATTERN.sub("", without_styles)
+    without_tags = HTML_TAG_PATTERN.sub("", without_scripts)
     unescaped = html.unescape(without_tags)
     compact = re.sub(r"\s+", " ", unescaped)
     return compact.strip()
