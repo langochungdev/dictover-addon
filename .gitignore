@@ -12,3 +12,6 @@ docs/
 tmp/
 .agents/
 temp/
+web/popup.js
+web/popup.css
+web/main.css
