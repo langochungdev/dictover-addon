@@ -146,7 +146,7 @@ const isShortTranslate = computed(() => {
       
       <!-- Translate Result -->
       <template v-else-if="store.lookupResult && store.lookupResult.type === 'translate'">
-        <div :class="['apl-body', 'apl-translate-compact', { 'apl-translate-hover-actions': /\s/.test((store.lookupResult.original || '').trim()) }]">
+        <div class="apl-body apl-translate-compact apl-translate-hover-actions">
           <div class="apl-translate-vi apl-translate-vi--primary">
             <span class="apl-translate-text">
               {{ store.lookupResult.translated }}

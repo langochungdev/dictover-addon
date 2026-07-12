@@ -140,7 +140,10 @@
     width: fit-content;
     max-width: min(560px, calc(100vw - 20px));
     max-height: min(55vh, 420px);
-    overflow: auto;
+    height: max-content;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
     border: 1px solid var(--outline);
     border-radius: 10px;
     background: var(--surface);
@@ -152,6 +155,10 @@
     font-size: var(--apl-user-font-size, inherit) !important;
     transform-origin: top left;
     overscroll-behavior: contain;
+}
+
+.apl-popover::-webkit-scrollbar {
+    display: none;
 }
 
 .apl-popover[data-side="top"] {
@@ -389,6 +396,8 @@
 
 .apl-translate-hover-actions {
     position: relative;
+    min-height: 36px;
+    min-width: 120px;
 }
 
 .apl-translate-inline-actions {
