@@ -21,6 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [Unreleased]: https://github.com/OWNER/REPO/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/OWNER/REPO/releases/tag/v0.1.0
 
+## v0.9.0 (2026-07-13)
+
+### Feat
+
+- implement Pinia store for application settings management
+- implement SettingsModal with custom styling, localization, and Vite build configuration
+- implement MainPopover component with floating-ui positioning and lookup/translate result rendering
+- implement MainPopover component with i18n support, floating UI positioning, and lookup/translate handlers
+- implement DefinitionSubPanel and ImageSubPanel components for popover extension content
+
 ## v0.8.0 (2026-07-12)
 
 ### Feat
