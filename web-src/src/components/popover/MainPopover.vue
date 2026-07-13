@@ -108,7 +108,28 @@ const summaryMeaning = computed(() => {
 })
 
 const displayDefinition = computed(() => {
-  return store.lookupResult?.definition_display || ''
+  const def = (store.lookupResult?.definition_display || '').trim();
+  if (!def) return '';
+
+  const defLower = def.toLowerCase();
+  const summaryLower = summaryMeaning.value.trim().toLowerCase();
+  
+  const cleanDef = defLower.replace(/[.,;!?()[\]{}"']/g, ' ').replace(/\s+/g, ' ').trim();
+  const cleanSummary = summaryLower.replace(/[.,;!?()[\]{}"']/g, ' ').replace(/\s+/g, ' ').trim();
+  
+  if (!cleanDef) return t('See details');
+  if (cleanDef === cleanSummary) return t('See details');
+  
+  if (cleanSummary.includes(cleanDef) || cleanDef.includes(cleanSummary)) {
+    return t('See details');
+  }
+  
+  const defWords = cleanDef.split(/\s+/).filter(Boolean);
+  if (defWords.length <= 2) {
+    return t('See details');
+  }
+  
+  return def;
 })
 
 const isShortTranslate = computed(() => {

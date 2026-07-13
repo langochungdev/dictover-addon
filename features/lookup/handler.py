@@ -222,12 +222,14 @@ def handle_lookup(word: str) -> dict[str, Any]:
         elif definition_language_mode == "english":
             definition_target_language = "en"
 
+        actual_definition_language = "vi" if lookup_language == "ko" else lookup_language
+
         definition_display = first_definition
-        if first_definition and lookup_language != definition_target_language:
+        if first_definition and actual_definition_language != definition_target_language:
             try:
                 definition_display = _translate_definition_cached(
                     first_definition,
-                    lookup_language,
+                    actual_definition_language,
                     definition_target_language,
                 )
             except Exception:
