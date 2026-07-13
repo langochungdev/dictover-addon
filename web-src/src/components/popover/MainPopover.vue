@@ -29,7 +29,7 @@ const virtualEl = computed(() => {
 })
 
 const { floatingStyles } = useFloating(virtualEl, popoverRef, {
-  placement: 'bottom',
+  placement: 'bottom-start',
   strategy: 'fixed',
   whileElementsMounted: autoUpdate,
   middleware: [
