@@ -8,6 +8,18 @@ import { useI18n } from '../../composables/useI18n'
 const store = useSettingsStore()
 const { t } = useI18n()
 
+import catImg from '../../assets/cat.jpg'
+import qrImg from '../../assets/qr.jpg'
+
+const showDonateQr = ref(false)
+const hasDonated = ref(false)
+const donateText = computed(() => hasDonated.value ? t('Thank you beautiful people\nfor your support!') : t('Donate treats for\nmy cat Bự'))
+
+function closeDonateQr() {
+  showDonateQr.value = false
+  hasDonated.value = true
+}
+
 declare const __APP_VERSION__: string;
 const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.7.0';
 
@@ -100,25 +112,32 @@ function handleFontSizeInput(e: Event) {
 <template>
   <div class="settings-modal-wrapper">
     <div class="apl-settings-overlay" role="dialog" aria-modal="true" @mousedown.self="close">
-      <div class="apl-settings-modal">
+      <div class="apl-settings-modal" style="position: relative;">
         <!-- Header -->
-        <div class="apl-settings-header apl-settings-header--pro">
+        <div class="apl-settings-header apl-settings-header--pro" style="display: flex; justify-content: space-between; align-items: center;">
           <div class="apl-settings-title-group">
-            <h1 class="apl-settings-title">
-              DictOver 
+            <h1 class="apl-settings-title" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+              <span>DictOver</span>
               <span class="apl-settings-version-badge">v{{ version }}</span>
             </h1>
-            <p class="apl-settings-subtitle">{{ t('Popup Dictionary Settings') }}</p>
           </div>
-          <a class="apl-settings-support-link" href="https://langochung.me" target="_blank">
-            <div class="apl-settings-support-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          <div class="apl-settings-header-right" style="display: flex; align-items: center; gap: 10px;">
+            <div class="apl-settings-donate" @click="showDonateQr = true">
+              <div style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; position: relative; z-index: 1;">
+                <span style="font-size: 13px; font-weight: 600; color: var(--primary-text); line-height: 1.2; white-space: pre-wrap;">{{ donateText }}</span>
+              </div>
+              <img :src="catImg" style="position: absolute; left: 0; top: 0; width: 42px; height: 100%; object-fit: cover;" alt="cat" />
             </div>
-            <div class="apl-settings-support-text">
-              <span class="apl-settings-support-title">{{ t('Feedback & Support') }}</span>
-              <span class="apl-settings-support-author">Made by langochung.me</span>
-            </div>
-          </a>
+            <a class="apl-settings-support-link" href="https://langochung.me" target="_blank">
+              <div class="apl-settings-support-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+              </div>
+              <div class="apl-settings-support-text">
+                <span class="apl-settings-support-title">{{ t('Feedback & Support') }}</span>
+                <span class="apl-settings-support-author">Made by langochung.me</span>
+              </div>
+            </a>
+          </div>
         </div>
 
         <!-- Languages -->
@@ -250,6 +269,13 @@ function handleFontSizeInput(e: Event) {
         </div>
 
 
+      </div>
+
+      <!-- QR Popup Overlay (Fixed position, completely outside modal layout to avoid expanding it) -->
+      <div v-if="showDonateQr" class="apl-settings-qr-popup" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;" @mousedown.self="closeDonateQr">
+        <div style="background: var(--surface); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          <img :src="qrImg" style="max-width: 250px; max-height: 250px; border-radius: 8px;" alt="QR Code" />
+        </div>
       </div>
     </div>
   </div>

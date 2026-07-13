@@ -113,6 +113,25 @@
     border-color: var(--accent);
 }
 
+.apl-settings-donate {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding: 6px 10px 6px 50px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--outline);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex: 0 0 auto;
+}
+
+.apl-settings-donate:hover {
+    background: var(--surface-hover);
+    border-color: var(--accent);
+}
+
 .apl-settings-support-icon {
     display: flex;
     align-items: center;
