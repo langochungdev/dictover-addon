@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { usePopoverStore } from '../../stores/popover.store'
 import { useSettingsStore } from '../../stores/settings.store'
 
-import { offset, flip, size, useFloating, autoUpdate } from '@floating-ui/vue'
+import { offset, flip, shift, size, useFloating, autoUpdate } from '@floating-ui/vue'
 
 const store = usePopoverStore()
 const settingsStore = useSettingsStore()
@@ -26,13 +26,13 @@ useFloating(mainPopoverEl, subPanelRef, {
   whileElementsMounted: autoUpdate,
   middleware: [
     offset(8),
-    flip({ fallbackPlacements: ['left-start', 'bottom', 'top'], fallbackStrategy: 'initialPlacement' }),
+    flip({ fallbackPlacements: ['left-start'], fallbackStrategy: 'bestFit' }),
+    shift({ padding: 12 }),
     size({
       padding: 12,
-      apply({ availableWidth, availableHeight, elements, x, y }) {
+      apply({ availableWidth, elements, x, y }) {
         Object.assign(elements.floating.style, {
           maxWidth: `${Math.min(520, availableWidth)}px`,
-          maxHeight: `${availableHeight}px`,
           top: `${y}px`,
           left: `${x}px`,
           transform: 'none'

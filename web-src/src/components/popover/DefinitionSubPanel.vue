@@ -4,7 +4,7 @@ import { usePopoverStore } from '../../stores/popover.store'
 import { useSettingsStore } from '../../stores/settings.store'
 import { useI18n } from '../../composables/useI18n'
 
-import { offset, flip, size, useFloating, autoUpdate } from '@floating-ui/vue'
+import { offset, flip, shift, size, useFloating, autoUpdate } from '@floating-ui/vue'
 
 const store = usePopoverStore()
 const settingsStore = useSettingsStore()
@@ -21,18 +21,18 @@ watch(() => store.isDetailsOpen, (isOpen: boolean) => {
 }, { immediate: true })
 
 useFloating(mainPopoverEl, subPanelRef, {
-  placement: 'right-end',
+  placement: 'right-start',
   strategy: 'fixed',
   whileElementsMounted: autoUpdate,
   middleware: [
     offset(8),
-    flip({ fallbackPlacements: ['left-end', 'bottom', 'top'], fallbackStrategy: 'initialPlacement' }),
+    flip({ fallbackPlacements: ['left-start'], fallbackStrategy: 'bestFit' }),
+    shift({ padding: 12 }),
     size({
       padding: 12,
-      apply({ availableWidth, availableHeight, elements, x, y }) {
+      apply({ availableWidth, elements, x, y }) {
         Object.assign(elements.floating.style, {
           maxWidth: `${Math.min(440, availableWidth)}px`,
-          maxHeight: `${availableHeight}px`,
           top: `${y}px`,
           left: `${x}px`,
           transform: 'none'
