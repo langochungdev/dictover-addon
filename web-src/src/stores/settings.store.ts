@@ -15,7 +15,7 @@ export const useSettingsStore = defineStore('settings', () => {
     trigger_mode: 'auto',
     shortcut_combo: 'Shift',
     auto_play_audio_mode: 'off',
-    hide_home_settings_button: false,
+    hide_home_settings_button: (window as any).__aplRuntimeBootstrap?.hide_home_settings_button ?? false,
     theme: 'dark',
     panel_open_mode: 'none',
     definition_language_mode: 'output',
