@@ -20,8 +20,7 @@ function closeDonateQr() {
   hasDonated.value = true
 }
 
-declare const __APP_VERSION__: string;
-const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.7.0';
+const version = (window as any).__aplAddonVersion || '0.9.0';
 
 const languages = [
   { code: 'auto', name: 'Auto' },
