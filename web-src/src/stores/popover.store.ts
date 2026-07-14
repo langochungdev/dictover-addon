@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { pycmdService } from '../services/pycmd.service'
 
 export const usePopoverStore = defineStore('popover', () => {
   const isVisible = ref(false)
@@ -41,6 +42,7 @@ export const usePopoverStore = defineStore('popover', () => {
     isVisible.value = false
     isDetailsOpen.value = false
     isImageOpen.value = false
+    pycmdService.send('audio:stop')
   }
 
   function toggleDetails() {
