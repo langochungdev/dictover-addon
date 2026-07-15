@@ -581,6 +581,7 @@ def _build_runtime_bootstrap_payload() -> dict[str, object]:
             runtime_settings.get("hide_home_settings_button"),
             bool(DEFAULT_RUNTIME_SETTINGS["hide_home_settings_button"]),
         ),
+        "popover_theme": runtime_settings.get("popover_theme", DEFAULT_RUNTIME_SETTINGS["popover_theme"]),
     }
 
 
