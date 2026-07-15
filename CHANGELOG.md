@@ -21,6 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [Unreleased]: https://github.com/OWNER/REPO/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/OWNER/REPO/releases/tag/v0.1.0
 
+## v0.10.0 (2026-07-15)
+
+### Feat
+
+- add popover_theme setting and implement Pinia settings store for state management
+- create SettingsModal component with language, trigger, and layout configuration options
+- implement App shell and settings trigger with updated runtime configuration retrieval
+- add Pinia store for managing popover state and UI visibility
+- add SettingsModal component for managing addon preferences
+
 ## v0.9.0 (2026-07-13)
 
 ### Feat
