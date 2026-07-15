@@ -123,7 +123,7 @@ function handleFontSizeInput(e: Event) {
           <div class="apl-settings-header-right" style="display: flex; align-items: center; gap: 10px;">
             <div class="apl-settings-donate" @click="showDonateQr = true">
               <div style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; position: relative; z-index: 1;">
-                <span style="font-size: 13px; font-weight: 600; color: var(--primary-text); line-height: 1.2; white-space: pre-wrap;">{{ donateText }}</span>
+                <span style="font-size: 13px; font-weight: 600; color: var(--primary-text); line-height: 1.2; white-space: pre-wrap; text-align: left;">{{ donateText }}</span>
               </div>
               <img :src="catImg" style="position: absolute; left: 0; top: 0; width: 42px; height: 100%; object-fit: cover;" alt="cat" />
             </div>
