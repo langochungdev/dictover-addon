@@ -19,6 +19,19 @@ const isDeckBrowser = (window as any).__aplIsDeckBrowser !== false
 
 let selectionTimeout: any = null
 
+function executeTranslation(selection: Selection, text: string) {
+  const range = selection.getRangeAt(0)
+  const rect = range.getBoundingClientRect()
+  popoverStore.setPosition(rect)
+  popoverStore.isLoading = true
+  popoverStore.isVisible = true
+
+  const wordCount = text.split(/\s+/).filter(Boolean).length
+  const command = wordCount > 1 ? 'translate' : 'lookup'
+
+  pycmdService.send(`${command}:${text}`)
+}
+
 function handleMouseDown(event: MouseEvent) {
   const target = event.target as HTMLElement
   if (target.closest('.apl-popover') || target.closest('.apl-settings-overlay') || target.closest('.debug-panel')) {
@@ -62,17 +75,38 @@ function handleMouseUp(event: MouseEvent) {
       }
     }
 
-    const range = selection!.getRangeAt(0)
-    const rect = range.getBoundingClientRect()
-    popoverStore.setPosition(rect)
-    popoverStore.isLoading = true
-    popoverStore.isVisible = true
-
-    const wordCount = text.split(/\s+/).filter(Boolean).length
-    const command = wordCount > 1 ? 'translate' : 'lookup'
-
-    pycmdService.send(`${command}:${text}`)
+    executeTranslation(selection!, text)
   }, 300)
+}
+
+function handleKeyUp(event: KeyboardEvent) {
+  const target = event.target as HTMLElement
+  if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.closest('.apl-settings-overlay') || target.closest('.apl-popover') || target.closest('.debug-panel'))) {
+    return
+  }
+
+  const mode = settingsStore.popover.trigger_mode
+  const shortcut = settingsStore.popover.shortcut_combo
+
+  if (mode !== 'shortcut') return
+
+  if (
+    (shortcut === 'Shift' && event.key === 'Shift') ||
+    (shortcut === 'Ctrl' && event.key === 'Control') ||
+    (shortcut === 'Alt' && event.key === 'Alt')
+  ) {
+    const selection = window.getSelection()
+    const text = selection?.toString().trim()
+    
+    if (!text) {
+      return
+    }
+
+    if (selectionTimeout) clearTimeout(selectionTimeout)
+    selectionTimeout = setTimeout(() => {
+      executeTranslation(selection!, text)
+    }, 50)
+  }
 }
 
 onMounted(() => {
@@ -117,11 +151,13 @@ onMounted(() => {
 
   document.addEventListener('mouseup', handleMouseUp)
   document.addEventListener('mousedown', handleMouseDown)
+  document.addEventListener('keyup', handleKeyUp)
 })
 
 onUnmounted(() => {
   document.removeEventListener('mouseup', handleMouseUp)
   document.removeEventListener('mousedown', handleMouseDown)
+  document.removeEventListener('keyup', handleKeyUp)
 })
 </script>
 

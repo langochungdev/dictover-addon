@@ -40,7 +40,7 @@
     }
 }
 
-[data-theme="dark"], [data-theme="dark"] .apl-popover, [data-theme="dark"] .apl-subpanel, [data-theme="dark"] .apl-settings-root {
+[data-theme="dark"], [data-theme="dark"] .apl-popover, [data-theme="dark"] .apl-subpanel, [data-theme="dark"] .apl-settings-root, [data-theme="dark"] .apl-settings-trigger {
     --canvas: #282725;
     --surface: #2f2d2a;
     --surface-hover: #383634;
@@ -55,7 +55,7 @@
     --shadow-deep: rgba(0, 0, 0, 0.6);
 }
 
-[data-theme="light"], [data-theme="light"] .apl-popover, [data-theme="light"] .apl-subpanel, [data-theme="light"] .apl-settings-root {
+[data-theme="light"], [data-theme="light"] .apl-popover, [data-theme="light"] .apl-subpanel, [data-theme="light"] .apl-settings-root, [data-theme="light"] .apl-settings-trigger {
     --canvas: #f4f7fd;
     --surface: #ffffff;
     --surface-hover: #f8fbff;

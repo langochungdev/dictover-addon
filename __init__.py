@@ -489,12 +489,12 @@ def _runtime_settings_from_config(config: dict) -> dict[str, object]:
     }
 
 
-def _runtime_settings_from_file_only() -> dict[str, object]:
-    return _runtime_settings_from_config({})
+def _get_current_runtime_settings() -> dict[str, object]:
+    return _runtime_settings_from_config(_get_runtime_config())
 
 
 def _save_runtime_settings(partial_settings: dict[str, object]) -> dict[str, object]:
-    merged = _runtime_settings_from_file_only()
+    merged = _get_current_runtime_settings()
 
     for key in [
         "enable_lookup",
@@ -560,7 +560,7 @@ def _save_runtime_settings(partial_settings: dict[str, object]) -> dict[str, obj
 
 def _build_settings_payload() -> dict:
     translation = _load_translation_config()
-    settings = _runtime_settings_from_file_only()
+    settings = _get_current_runtime_settings()
 
     return {
         "type": "settings_state",
@@ -575,7 +575,7 @@ def _build_settings_payload() -> dict:
 
 
 def _build_runtime_bootstrap_payload() -> dict[str, object]:
-    runtime_settings = _runtime_settings_from_file_only()
+    runtime_settings = _get_current_runtime_settings()
     return {
         "hide_home_settings_button": _coerce_bool(
             runtime_settings.get("hide_home_settings_button"),
