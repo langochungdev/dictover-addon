@@ -1,9 +1,60 @@
 #!/usr/bin/env bash
-echo "========================================================"
-echo "❌ Vui lòng KHÔNG sử dụng lệnh 'git push' trực tiếp!"
-echo "👉 Lệnh này không tự động tạo version và tag mới được."
-echo ""
-echo "🔥 HÃY CHẠY LỆNH SAU ĐỂ PUSH & RELEASE TỰ ĐỘNG:"
-echo "   python scripts/release.py"
-echo "========================================================"
-exit 1
+set -euo pipefail
+
+# Lấy thư mục gốc của project
+HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$HOOK_DIR/.." && pwd)"
+cd "$REPO_ROOT"
+
+# Kiểm tra công cụ cz
+if ! command -v cz >/dev/null 2>&1; then
+  echo "Commitizen is required. Install with: pip install -r requirements-dev.txt" >&2
+  exit 1
+fi
+
+echo "🚀 Đang kiểm tra và tự động tạo Release mới..."
+
+set +e
+output="$(cz bump --yes --check-consistency 2>&1)"
+status=$?
+set -e
+
+# Nếu KHÔNG CÓ commit mới (không tạo được version mới)
+if echo "$output" | grep -qiE "No commits found|No increment found|No new commits"; then
+  echo "✅ Không có version mới cần tạo. Đang tiếp tục push bình thường..."
+  exit 0
+fi
+
+# Nếu CÓ LỖI khi bump (không phải là lỗi "no commits")
+if [[ $status -ne 0 ]]; then
+  echo "❌ Lỗi khi tạo version mới:" >&2
+  echo "$output" >&2
+  exit 1
+fi
+
+# Nếu TẠO VERSION MỚI THÀNH CÔNG
+echo "✅ Đã tạo Version và Changelog mới thành công!"
+echo "🔄 Đang tự động đẩy code và tags lên Github..."
+
+# Tự động thực hiện push bằng script (bỏ qua hook để tránh loop)
+if git push origin HEAD --follow-tags --no-verify; then
+    echo "📦 Đang tự động build file .ankiaddon..."
+    if command -v python >/dev/null 2>&1; then
+        python scripts/build_release.py
+    fi
+    
+    echo ""
+    echo "==============================================================="
+    echo "🎉🎉 HOÀN TẤT: CODE, TAGS VÀ RELEASE ĐÃ ĐƯỢC ĐẨY LÊN GITHUB! 🎉🎉"
+    echo "==============================================================="
+    echo "⚠️ LƯU Ý: Vui lòng BỎ QUA dòng chữ 'error: failed to push some refs'"
+    echo "hiển thị ngay bên dưới. Đó chỉ là cảnh báo mặc định của Git do"
+    echo "script đã tự động làm thay công việc của nó!"
+    echo "==============================================================="
+    
+    # Bắt buộc trả về 1 để hủy lệnh push CŨ của Git (tránh đè code hoặc lỗi non-fast-forward)
+    exit 1
+else
+    echo "❌ Lỗi khi đẩy lên Github!" >&2
+    exit 1
+fi
