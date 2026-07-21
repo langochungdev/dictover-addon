@@ -39,10 +39,12 @@ export const usePopoverStore = defineStore('popover', () => {
   }
 
   function hide() {
+    if (isVisible.value) {
+      pycmdService.send('audio:stop')
+    }
     isVisible.value = false
     isDetailsOpen.value = false
     isImageOpen.value = false
-    pycmdService.send('audio:stop')
   }
 
   function toggleDetails() {
