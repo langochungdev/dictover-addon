@@ -1,9 +1,13 @@
 {
-  "package": "anki_popup_lookup",
-  "version": "0.9.1",
-  "name": "DictOver: Popup Lookup - Definition & Translation",
-  "mod": 0,
-  "min_point_version": 231000,
-  "conflicts": [],
-  "tags": ["lookup", "dictionary", "translation"]
+    "package": "anki_popup_lookup",
+    "version": "0.10.0",
+    "name": "DictOver: Popup Lookup - Definition & Translation",
+    "mod": 0,
+    "min_point_version": 231000,
+    "conflicts": [],
+    "tags": [
+        "lookup",
+        "dictionary",
+        "translation"
+    ]
 }
