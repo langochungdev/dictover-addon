@@ -188,9 +188,9 @@ def _build_frontend(source_root: Path) -> tuple[bool, str]:
     
     print(f"Building frontend in {web_src}...")
     try:
-        # Use shell=True on Windows to resolve npm command
+        # Use shell=True on Windows to resolve bun command
         process = subprocess.run(
-            ["npm", "run", "build"],
+            ["bun", "run", "build"],
             cwd=str(web_src),
             check=False,
             capture_output=True,
@@ -198,10 +198,10 @@ def _build_frontend(source_root: Path) -> tuple[bool, str]:
             shell=True
         )
         if process.returncode != 0:
-            return False, f"npm build failed:\n{process.stdout}\n{process.stderr}"
+            return False, f"bun build failed:\n{process.stdout}\n{process.stderr}"
         return True, "Frontend built successfully"
     except Exception as error:
-        return False, f"Failed to run npm build: {error}"
+        return False, f"Failed to run bun build: {error}"
 
 
 def main() -> None:
