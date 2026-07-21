@@ -8,12 +8,11 @@ import { useI18n } from '../../composables/useI18n'
 const store = useSettingsStore()
 const { t } = useI18n()
 
-import catImg from '../../assets/cat.jpg'
 import qrImg from '../../assets/qr.jpg'
 
 const showDonateQr = ref(false)
 const hasDonated = ref(false)
-const donateText = computed(() => hasDonated.value ? t('Thank you beautiful people\nfor your support!') : t('Donate treats for\nmy cat Bự'))
+const donateText = computed(() => hasDonated.value ? t('Thank you beautiful people\nfor your support!') : t('Support my work'))
 
 function closeDonateQr() {
   showDonateQr.value = false
@@ -122,10 +121,15 @@ function handleFontSizeInput(e: Event) {
           </div>
           <div class="apl-settings-header-right" style="display: flex; align-items: center; gap: 10px;">
             <div class="apl-settings-donate" @click="showDonateQr = true">
-              <div style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; position: relative; z-index: 1;">
-                <span style="font-size: 13px; font-weight: 600; color: var(--primary-text); line-height: 1.2; white-space: pre-wrap; text-align: left;">{{ donateText }}</span>
+              <div class="apl-settings-donate-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
               </div>
-              <img :src="catImg" style="position: absolute; left: 0; top: 0; width: 42px; height: 100%; object-fit: cover;" alt="cat" />
+              <div class="apl-settings-donate-content">
+                <span class="apl-settings-donate-title">{{ donateText }}</span>
+                <span class="apl-settings-donate-subtitle">Buy me a coffee ☕</span>
+              </div>
             </div>
             <a class="apl-settings-support-link" href="https://langochung.me" target="_blank">
               <div class="apl-settings-support-icon">

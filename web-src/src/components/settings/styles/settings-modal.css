@@ -114,11 +114,10 @@
 }
 
 .apl-settings-donate {
-    position: relative;
-    overflow: hidden;
     display: flex;
     align-items: center;
-    padding: 6px 10px 6px 50px;
+    gap: 8px;
+    padding: 6px 10px;
     border-radius: 10px;
     background: var(--surface);
     border: 1px solid var(--outline);
@@ -128,8 +127,36 @@
 }
 
 .apl-settings-donate:hover {
-    background: var(--surface-hover);
-    border-color: var(--accent);
+    background: rgba(255, 71, 87, 0.05);
+    border-color: #ff4757;
+}
+
+.apl-settings-donate-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff4757;
+}
+
+.apl-settings-donate-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.apl-settings-donate-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary-text);
+    line-height: 1.2;
+}
+
+.apl-settings-donate-subtitle {
+    font-size: 11px;
+    color: var(--muted-text);
+    font-weight: 500;
+    line-height: 1.2;
 }
 
 .apl-settings-support-icon {

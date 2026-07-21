@@ -40,7 +40,7 @@ const translations: Record<string, Record<string, string>> = {
     'Finnish': 'Finnish',
     'German': 'German',
     'French': 'French',
-    'Donate treats for\nmy cat Bự': 'Donate treats for\nmy cat Bự',
+    'Support my work': 'Support my work',
     'Thank you beautiful people\nfor your support!': 'Thank you beautiful people\nfor your support!',
   },
   vi: {
@@ -81,7 +81,7 @@ const translations: Record<string, Record<string, string>> = {
     'Finnish': 'Tiếng Phần Lan',
     'German': 'Tiếng Đức',
     'French': 'Tiếng Pháp',
-    'Donate treats for\nmy cat Bự': 'Donate pate cho\nbé Bự nhà em',
+    'Support my work': 'Ủng hộ dự án',
     'Thank you beautiful people\nfor your support!': 'Cảm ơn trai đẹp gái đẹp\nđã ủng hộ ạ!',
   },
   ja: {
@@ -121,7 +121,7 @@ const translations: Record<string, Record<string, string>> = {
     'Finnish': 'フィンランド語',
     'German': 'ドイツ語',
     'French': 'フランス語',
-    'Donate treats for\nmy cat Bự': 'うちの猫Bựに\nおやつを寄付する',
+    'Support my work': 'プロジェクトを支援する',
     'Thank you beautiful people\nfor your support!': 'ご支援ありがとうございます、\n美男美女の皆様！',
   },
   ko: {
@@ -161,7 +161,7 @@ const translations: Record<string, Record<string, string>> = {
     'Finnish': '핀란드어',
     'German': '독일어',
     'French': '프랑스어',
-    'Donate treats for\nmy cat Bự': '우리 고양이 Bự를 위해\n간식 후원하기',
+    'Support my work': '프로젝트 후원하기',
     'Thank you beautiful people\nfor your support!': '후원해 주신 멋진 분들\n정말 감사합니다!',
   },
   'zh-CN': {
@@ -201,7 +201,7 @@ const translations: Record<string, Record<string, string>> = {
     'Finnish': '芬兰语',
     'German': '德语',
     'French': '法语',
-    'Donate treats for\nmy cat Bự': '给我的猫咪Bự\n打赏点猫条吧',
+    'Support my work': '支持本项目',
     'Thank you beautiful people\nfor your support!': '感谢各位帅哥美女\n的支持！',
   },
   ru: {
@@ -241,7 +241,7 @@ const translations: Record<string, Record<string, string>> = {
     'Finnish': 'Финский',
     'German': 'Немецкий',
     'French': 'Французский',
-    'Donate treats for\nmy cat Bự': 'Пожертвовать на вкусняшки\nдля моего кота Bự',
+    'Support my work': 'Поддержать проект',
     'Thank you beautiful people\nfor your support!': 'Спасибо всем прекрасным людям\nза вашу поддержку!',
   },
   fi: {
@@ -281,7 +281,7 @@ const translations: Record<string, Record<string, string>> = {
     'Finnish': 'Suomi',
     'German': 'Saksa',
     'French': 'Ranska',
-    'Donate treats for\nmy cat Bự': 'Lahjoita herkkuja\nkissalleni Bựlle',
+    'Support my work': 'Tue työtäni',
     'Thank you beautiful people\nfor your support!': 'Kiitos kauniit ihmiset\ntuestanne!',
   },
   de: {
@@ -321,7 +321,7 @@ const translations: Record<string, Record<string, string>> = {
     'Finnish': 'Finnisch',
     'German': 'Deutsch',
     'French': 'Französisch',
-    'Donate treats for\nmy cat Bự': 'Spende Leckerlis für\nmeine Katze Bự',
+    'Support my work': 'Meine Arbeit unterstützen',
     'Thank you beautiful people\nfor your support!': 'Danke an alle wunderbaren Menschen\nfür eure Unterstützung!',
   },
   fr: {
@@ -361,7 +361,7 @@ const translations: Record<string, Record<string, string>> = {
     'Finnish': 'Finnois',
     'German': 'Allemand',
     'French': 'Français',
-    'Donate treats for\nmy cat Bự': 'Faire un don de friandises\npour mon chat Bự',
+    'Support my work': 'Soutenir mon travail',
     'Thank you beautiful people\nfor your support!': 'Merci à toutes les belles personnes\npour votre soutien !',
   }
 }
