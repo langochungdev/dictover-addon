@@ -1,5 +1,5 @@
 
-:root, .apl-popover, .apl-subpanel, .apl-debug-panel, .apl-settings-root, .apl-settings-trigger, .preview-shell {
+.apl-popover, .apl-subpanel, .apl-debug-panel, .settings-modal-wrapper, .apl-settings-trigger, .preview-shell {
     /* Color Roles - Light Mode (Default) */
     --canvas: #f4f7fd;
     --surface: #ffffff;
@@ -23,7 +23,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-    :root, .apl-popover, .apl-subpanel, .apl-debug-panel, .apl-settings-root, .apl-settings-trigger, .preview-shell {
+    .apl-popover, .apl-subpanel, .apl-debug-panel, .settings-modal-wrapper, .apl-settings-trigger, .preview-shell {
         /* Color Roles - Dark Mode */
         --canvas: #282725;
         --surface: #2f2d2a;
@@ -40,7 +40,7 @@
     }
 }
 
-[data-theme="dark"], [data-theme="dark"] .apl-popover, [data-theme="dark"] .apl-subpanel, [data-theme="dark"] .apl-settings-root, [data-theme="dark"] .apl-settings-trigger {
+[data-apl-theme="dark"] .apl-popover, [data-apl-theme="dark"] .apl-subpanel, [data-apl-theme="dark"] .settings-modal-wrapper, [data-apl-theme="dark"] .apl-settings-trigger {
     --canvas: #282725;
     --surface: #2f2d2a;
     --surface-hover: #383634;
@@ -55,7 +55,7 @@
     --shadow-deep: rgba(0, 0, 0, 0.6);
 }
 
-[data-theme="light"], [data-theme="light"] .apl-popover, [data-theme="light"] .apl-subpanel, [data-theme="light"] .apl-settings-root, [data-theme="light"] .apl-settings-trigger {
+[data-apl-theme="light"] .apl-popover, [data-apl-theme="light"] .apl-subpanel, [data-apl-theme="light"] .settings-modal-wrapper, [data-apl-theme="light"] .apl-settings-trigger {
     --canvas: #f4f7fd;
     --surface: #ffffff;
     --surface-hover: #f8fbff;
@@ -891,7 +891,7 @@
     transform: translateY(-4px);
 }
 
-.apl-settings-root {
+.settings-modal-wrapper {
     position: fixed;
     inset: 0;
     z-index: 2147483647 !important;
@@ -901,8 +901,8 @@
     font-weight: 400;
 }
 
-.apl-settings-root,
-.apl-settings-root * {
+.settings-modal-wrapper,
+.settings-modal-wrapper * {
     box-sizing: border-box;
     font-family: var(--font-family);
     letter-spacing: normal;
@@ -910,7 +910,7 @@
     text-shadow: none;
 }
 
-.apl-settings-root--hidden {
+.settings-modal-wrapper--hidden {
     display: none;
 }
 

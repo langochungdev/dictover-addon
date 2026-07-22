@@ -33,7 +33,7 @@ export const useSettingsStore = defineStore('settings', () => {
       popover.value.theme = 'dark'
       return
     }
-    document.documentElement.setAttribute('data-theme', newTheme)
+    document.documentElement.setAttribute('data-apl-theme', newTheme)
   }, { immediate: true })
 
   watch(() => popover.value.font_size_px, (newPx) => {
