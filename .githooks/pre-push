@@ -6,55 +6,87 @@ HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$HOOK_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
-# Kiểm tra công cụ cz
-if ! command -v cz >/dev/null 2>&1; then
-  echo "Commitizen is required. Install with: pip install -r requirements-dev.txt" >&2
+echo "🚀 Đang kiểm tra version từ file manifest.json..."
+
+if [[ ! -f "manifest.json" ]]; then
+  echo "❌ Không tìm thấy file manifest.json!" >&2
   exit 1
 fi
 
-echo "🚀 Đang kiểm tra và tự động tạo Release mới..."
+# Đọc version từ manifest.json (bằng grep/sed để không cần dependency)
+CURRENT_VERSION=$(grep -E '"version":\s*"[^"]+"' manifest.json | sed -E 's/.*"version":\s*"([^"]+)".*/\1/' | head -n 1)
 
-set +e
-output="$(cz bump --yes --check-consistency 2>&1)"
-status=$?
-set -e
-
-# Nếu KHÔNG CÓ commit mới (không tạo được version mới)
-if echo "$output" | grep -qiE "No commits found|No increment found|No new commits"; then
-  echo "✅ Không có version mới cần tạo. Đang tiếp tục push bình thường..."
-  exit 0
-fi
-
-# Nếu CÓ LỖI khi bump (không phải là lỗi "no commits")
-if [[ $status -ne 0 ]]; then
-  echo "❌ Lỗi khi tạo version mới:" >&2
-  echo "$output" >&2
+if [[ -z "$CURRENT_VERSION" ]]; then
+  echo "❌ Không thể đọc được version từ manifest.json!" >&2
   exit 1
 fi
 
-# Nếu TẠO VERSION MỚI THÀNH CÔNG
-echo "✅ Đã tạo Version và Changelog mới thành công!"
-echo "🔄 Đang tự động đẩy code và tags lên Github..."
+TAG_NAME="v$CURRENT_VERSION"
 
-# Tự động thực hiện push bằng script (bỏ qua hook để tránh loop)
-if git push origin HEAD --follow-tags --no-verify; then
-    echo "📦 Đang tự động build file .ankiaddon..."
-    if command -v python >/dev/null 2>&1; then
-        python scripts/build_release.py
-    fi
-    
-    echo ""
-    echo "==============================================================="
-    echo "🎉🎉 HOÀN TẤT: CODE, TAGS VÀ RELEASE ĐÃ ĐƯỢC ĐẨY LÊN GITHUB! 🎉🎉"
-    echo "==============================================================="
-    echo "⚠️ LƯU Ý: Vui lòng BỎ QUA dòng chữ 'error: failed to push some refs'"
-    echo "hiển thị ngay bên dưới. Đó chỉ là cảnh báo mặc định của Git do"
-    echo "script đã tự động làm thay công việc của nó!"
-    echo "==============================================================="
-    
-    # Bắt buộc trả về 1 để hủy lệnh push CŨ của Git (tránh đè code hoặc lỗi non-fast-forward)
-    exit 1
-else
-    echo "❌ Lỗi khi đẩy lên Github!" >&2
-    exit 1
+# Kiểm tra version hiện tại ở .cz.toml để xem có cần đồng bộ không
+CZ_VERSION=$(grep -E '^version\s*=\s*".+"' .cz.toml 2>/dev/null | sed -E 's/.*version\s*=\s*"([^"]+)".*/\1/' | head -n 1 || echo "")
+
+NEEDS_SYNC=0
+if [[ "$CURRENT_VERSION" != "$CZ_VERSION" ]]; then
+  NEEDS_SYNC=1
+  echo "🔄 Đang tự động đồng bộ version $CURRENT_VERSION cho .cz.toml và package.json..."
+  
+  # Cập nhật .cz.toml (dùng sed)
+  if [[ -f ".cz.toml" ]]; then
+    sed -i -E "s/version = \"$CZ_VERSION\"/version = \"$CURRENT_VERSION\"/" .cz.toml
+  fi
+  
+  # Cập nhật package.json (dùng Python cho an toàn)
+  python -c "
+import json
+try:
+    with open('web-src/package.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    data['version'] = '$CURRENT_VERSION'
+    with open('web-src/package.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+except Exception:
+    pass
+"
+  
+  git add .cz.toml web-src/package.json
+  git commit -m "chore(release): sync version to $CURRENT_VERSION"
 fi
+
+# Kiểm tra xem tag này đã tồn tại trong git chưa
+if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+  if [[ $NEEDS_SYNC -eq 1 ]]; then
+    echo "🔄 Đang đẩy code đã được đồng bộ version lên Github..."
+    git push origin HEAD --no-verify
+    echo "✅ Đã đồng bộ và push thành công."
+    exit 1 # Hủy push gốc để tránh lỗi (vì đã push bằng lệnh trên)
+  else
+    echo "✅ Version $TAG_NAME đã tồn tại (không có thay đổi version mới). Đang tiếp tục push bình thường..."
+    exit 0
+  fi
+fi
+
+# Nếu CHƯA CÓ TAG (tức là user vừa sửa version ở manifest.json)
+echo "🌟 Phát hiện version mới: $TAG_NAME"
+echo "🔖 Đang tạo Git tag $TAG_NAME..."
+git tag "$TAG_NAME"
+
+echo "🔄 Đang đẩy code và tag lên Github..."
+git push origin HEAD --follow-tags --no-verify
+
+echo "📦 Đang tự động build file .ankiaddon..."
+if command -v python >/dev/null 2>&1; then
+    python scripts/build_release.py
+fi
+
+echo ""
+echo "==============================================================="
+echo "🎉🎉 HOÀN TẤT: CODE, TAGS VÀ RELEASE ($TAG_NAME) ĐÃ ĐƯỢC XỬ LÝ! 🎉🎉"
+echo "==============================================================="
+echo "⚠️ LƯU Ý: Vui lòng BỎ QUA dòng chữ 'error: failed to push some refs'"
+echo "hiển thị ngay bên dưới. Đó chỉ là cảnh báo mặc định của Git do"
+echo "script đã tự động làm thay công việc của nó!"
+echo "==============================================================="
+
+# Bắt buộc trả về 1 để hủy lệnh push CŨ của Git (tránh đè code hoặc lỗi non-fast-forward)
+exit 1
