@@ -16,6 +16,7 @@ EXCLUDED_DIR_NAMES = {
     ".vscode",
     "__pycache__",
     "dist",
+    "tmp",
     "release",
     "tests",
 }
@@ -41,8 +42,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-dir",
-        default="dist",
-        help="Output folder relative to repository root (default: dist).",
+        default="tmp",
+        help="Output folder relative to repository root (default: tmp).",
     )
     parser.add_argument(
         "--include-scripts",

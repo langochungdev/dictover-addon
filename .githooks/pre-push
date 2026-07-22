@@ -58,10 +58,22 @@ if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
   if [[ $NEEDS_SYNC -eq 1 ]]; then
     echo "🔄 Đang đẩy code đã được đồng bộ version lên Github..."
     git push origin HEAD --no-verify
+    
+    echo "📦 Đang tự động build file .ankiaddon (lưu vào thư mục tmp/)..."
+    if command -v python >/dev/null 2>&1; then
+        python scripts/build_release.py
+    fi
+    
     echo "✅ Đã đồng bộ và push thành công."
     exit 1 # Hủy push gốc để tránh lỗi (vì đã push bằng lệnh trên)
   else
-    echo "✅ Version $TAG_NAME đã tồn tại (không có thay đổi version mới). Đang tiếp tục push bình thường..."
+    echo "✅ Version $TAG_NAME đã tồn tại (không có thay đổi version mới)."
+    echo "📦 Đang tự động build file .ankiaddon (lưu vào thư mục tmp/)..."
+    if command -v python >/dev/null 2>&1; then
+        python scripts/build_release.py
+    fi
+    
+    echo "🔄 Đang tiếp tục lệnh push gốc của bạn..."
     exit 0
   fi
 fi
@@ -74,7 +86,7 @@ git tag "$TAG_NAME"
 echo "🔄 Đang đẩy code và tag lên Github..."
 git push origin HEAD --follow-tags --no-verify
 
-echo "📦 Đang tự động build file .ankiaddon..."
+echo "📦 Đang tự động build file .ankiaddon (lưu vào thư mục tmp/)..."
 if command -v python >/dev/null 2>&1; then
     python scripts/build_release.py
 fi
