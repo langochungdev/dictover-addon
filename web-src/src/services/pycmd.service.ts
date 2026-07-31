@@ -6,7 +6,6 @@ export const pycmdService = {
     if (typeof (window as any).pycmd !== 'undefined') {
       ;(window as any).pycmd(cmd)
     } else {
-      console.warn(`[pycmd mock] ${cmd}`)
       // Trigger a mock response if we are in preview mode
       if (cmd.startsWith('settings:get')) {
         setTimeout(() => {

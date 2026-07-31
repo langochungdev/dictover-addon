@@ -3,7 +3,7 @@ from __future__ import annotations
 from urllib.parse import quote
 
 
-GOOGLE_TTS_ENDPOINT = "https://translate.googleapis.com/translate_tts"
+GOOGLE_TTS_ENDPOINT = "https://translate.google.com/translate_tts"
 SUPPORTED_TTS_LANGUAGES = {
     "en",
     "zh-CN",
@@ -35,7 +35,7 @@ def build_google_tts_url(text: str, language: str) -> str:
 
     lang = normalize_tts_language(language)
     query = quote(normalized_text)
-    return f"{GOOGLE_TTS_ENDPOINT}?ie=UTF-8&client=gtx&tl={quote(lang)}&q={query}"
+    return f"{GOOGLE_TTS_ENDPOINT}?ie=UTF-8&client=tw-ob&tl={quote(lang)}&q={query}"
 
 
 def has_native_tts_fallback(audio_url: str) -> bool:

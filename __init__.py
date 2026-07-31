@@ -1369,26 +1369,11 @@ def _play_audio_url_native(audio_url: str) -> tuple[bool, str]:
     if not url:
         return (False, "missing audio url")
 
-    try:
-        request = Request(url, headers={"User-Agent": "anki-popup-lookup/1.0"})
-        with urlopen(request, timeout=12) as response:
-            payload = response.read()
-            content_type = str(response.headers.get("Content-Type", "")).lower()
-    except Exception as error:
-        return (False, f"download failed: {error}")
-
-    if not payload:
-        return (False, "downloaded payload is empty")
-
     extension = ".mp3"
     parsed_path = urlsplit(url).path
     suffix = Path(parsed_path).suffix.lower()
     if suffix in {".mp3", ".ogg", ".oga", ".wav"}:
         extension = suffix
-    elif "ogg" in content_type:
-        extension = ".ogg"
-    elif "wav" in content_type:
-        extension = ".wav"
 
     temp_dir = ADDON_DIR / "_tmp_audio"
     try:
@@ -1399,10 +1384,29 @@ def _play_audio_url_native(audio_url: str) -> tuple[bool, str]:
     digest = hashlib.sha1(url.encode("utf-8")).hexdigest()[:20]
     audio_path = temp_dir / f"apl_tts_{digest}{extension}"
 
-    try:
-        audio_path.write_bytes(payload)
-    except Exception as error:
-        return (False, f"cannot write audio file: {error}")
+    if not (audio_path.exists() and audio_path.stat().st_size > 0):
+        try:
+            request = Request(url, headers={"User-Agent": "anki-popup-lookup/1.0"})
+            with urlopen(request, timeout=4) as response:
+                payload = response.read()
+                content_type = str(response.headers.get("Content-Type", "")).lower()
+        except Exception as error:
+            return (False, f"download failed: {error}")
+
+        if not payload:
+            return (False, "downloaded payload is empty")
+
+        if "ogg" in content_type and extension == ".mp3":
+            extension = ".ogg"
+            audio_path = temp_dir / f"apl_tts_{digest}{extension}"
+        elif "wav" in content_type and extension == ".mp3":
+            extension = ".wav"
+            audio_path = temp_dir / f"apl_tts_{digest}{extension}"
+
+        try:
+            audio_path.write_bytes(payload)
+        except Exception as error:
+            return (False, f"cannot write audio file: {error}")
 
     try:
         from aqt import sound as aqt_sound

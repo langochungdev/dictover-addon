@@ -115,6 +115,8 @@ onMounted(() => {
 
     if (data.type === 'settings_state') {
       settingsStore.updateState(data)
+    } else if (data.type === 'audio_native_result') {
+      popoverStore.handleAudioResult(data.ok)
     } else if (data.type === 'lookup' || data.type === 'translate' || data.type === 'error' || data.type === 'image_search_result') {
       popoverStore.show(data)
       
@@ -123,7 +125,7 @@ onMounted(() => {
         const mode = settingsStore.popover.auto_play_audio_mode
         if (mode === 'all' || (mode === 'word' && data.type === 'lookup')) {
           if (data.audio_url && settingsStore.toolSettings.enable_audio) {
-            pycmdService.send(`audio:play:${encodeURIComponent(data.audio_url)}`)
+            popoverStore.playAudio(data.audio_url)
           }
         }
 

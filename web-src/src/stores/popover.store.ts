@@ -57,6 +57,62 @@ export const usePopoverStore = defineStore('popover', () => {
     if (isImageOpen.value) isDetailsOpen.value = false
   }
 
+  let audioFallbackTimeout: any = null
+  let isPlayingFallback = false
+
+  function triggerAudioFallback() {
+    if (audioFallbackTimeout) clearTimeout(audioFallbackTimeout)
+    audioFallbackTimeout = null
+    const text = lookupResult.value?.type === 'translate' 
+      ? lookupResult.value?.original 
+      : lookupResult.value?.word
+    const lang = lookupResult.value?.audio_lang || 'en'
+    
+    if (text) {
+      const fallbackUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(lang)}&q=${encodeURIComponent(text)}`
+      
+      isPlayingFallback = true
+      pycmdService.send(`audio:play:${encodeURIComponent(fallbackUrl)}`)
+      
+      audioFallbackTimeout = setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text)
+        window.speechSynthesis.speak(utterance)
+        isPlayingFallback = false
+      }, 4500)
+    }
+  }
+
+  function playAudio(url: string) {
+    if (!url) return
+    isPlayingFallback = false
+    pycmdService.send(`audio:play:${encodeURIComponent(url)}`)
+    
+    if (audioFallbackTimeout) clearTimeout(audioFallbackTimeout)
+    
+    audioFallbackTimeout = setTimeout(() => {
+      triggerAudioFallback()
+    }, 4500)
+  }
+
+  function handleAudioResult(ok: boolean) {
+    if (audioFallbackTimeout) {
+      clearTimeout(audioFallbackTimeout)
+      audioFallbackTimeout = null
+    }
+    if (!ok && !isPlayingFallback) {
+      triggerAudioFallback()
+    } else if (!ok && isPlayingFallback) {
+      const text = lookupResult.value?.type === 'translate' 
+        ? lookupResult.value?.original 
+        : lookupResult.value?.word
+      if (text) {
+        const utterance = new SpeechSynthesisUtterance(text)
+        window.speechSynthesis.speak(utterance)
+      }
+      isPlayingFallback = false
+    }
+  }
+
   return {
     isVisible,
     rect,
@@ -70,6 +126,8 @@ export const usePopoverStore = defineStore('popover', () => {
     setPosition,
     hide,
     toggleDetails,
-    toggleImagePanel
+    toggleImagePanel,
+    playAudio,
+    handleAudioResult
   }
 })

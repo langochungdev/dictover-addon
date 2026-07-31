@@ -60,14 +60,13 @@ const popoverStyleText = computed(() => {
 onMounted(() => {
   const el = popoverRef.value
   if (!el) {
-    console.log('[DictOver] MainPopover onMounted: popoverRef is null')
     return
   }
   // We removed the deep debug logs to keep it clean
 })
 
 function playAudio(url: string) {
-  pycmdService.send(`audio:play:${encodeURIComponent(url)}`)
+  store.playAudio(url)
 }
 
 function openSettings() {
