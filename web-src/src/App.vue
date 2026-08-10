@@ -43,7 +43,7 @@ function handleMouseDown(event: MouseEvent) {
 
 function handleMouseUp(event: MouseEvent) {
   const target = event.target as HTMLElement
-  if (target.closest('.apl-popover') || target.closest('.apl-settings-overlay') || target.closest('.debug-panel')) {
+  if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable || target.closest('.apl-popover') || target.closest('.apl-settings-overlay') || target.closest('.debug-panel'))) {
     return
   }
 
@@ -81,7 +81,7 @@ function handleMouseUp(event: MouseEvent) {
 
 function handleKeyUp(event: KeyboardEvent) {
   const target = event.target as HTMLElement
-  if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.closest('.apl-settings-overlay') || target.closest('.apl-popover') || target.closest('.debug-panel'))) {
+  if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable || target.closest('.apl-settings-overlay') || target.closest('.apl-popover') || target.closest('.debug-panel'))) {
     return
   }
 
