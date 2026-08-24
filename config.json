@@ -13,5 +13,6 @@
   "popover_trigger_mode": "auto",
   "popover_shortcut": "Shift",
   "popover_open_panel_mode": "none",
-  "popover_definition_language_mode": "output"
+  "popover_definition_language_mode": "output",
+  "enable_edit_field_during_review": false
 }

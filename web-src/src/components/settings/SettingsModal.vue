@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { useSettingsStore } from '../../stores/settings.store'
 import ThemeToggle from './ThemeToggle.vue'
 import CustomSelect from '../common/CustomSelect.vue'
@@ -18,6 +18,16 @@ function closeDonateQr() {
   showDonateQr.value = false
   hasDonated.value = true
 }
+
+const isNewFeature = ref(false)
+
+onMounted(() => {
+  if (!store.toolSettings.seen_edit_field_new) {
+    isNewFeature.value = true
+    store.toolSettings.seen_edit_field_new = true
+    handleSave()
+  }
+})
 
 const version = (window as any).__aplAddonVersion || '0.9.0';
 
@@ -160,24 +170,35 @@ function handleFontSizeInput(e: Event) {
 
         <!-- Trigger Mode -->
         <div class="apl-settings-section">
-          <label class="apl-settings-radio">
-            <input class="apl-settings-trigger-mode" type="radio" value="auto" v-model="store.popover.trigger_mode" @change="handleSave" />
-            {{ t('Auto trigger on selection') }}
-          </label>
-          <div class="apl-settings-radio-shortcut-row">
-            <label class="apl-settings-radio apl-settings-radio--inline">
-              <input class="apl-settings-trigger-mode" type="radio" value="shortcut" v-model="store.popover.trigger_mode" @change="handleSave" />
-              {{ t('Trigger with shortcut') }}
-            </label>
-            <div class="apl-settings-shortcut-group">
-              <label class="apl-settings-field apl-settings-field--shortcut-inline">
-                <span>{{ t('Shortcut') }}</span>
-                <input class="apl-settings-shortcut-input" type="text" readonly v-model="store.popover.shortcut_combo" :disabled="store.popover.trigger_mode !== 'shortcut'" />
+          <div style="display: flex; gap: 40px;">
+            <div style="flex: 1;">
+              <label class="apl-settings-radio">
+                <input class="apl-settings-trigger-mode" type="radio" value="auto" v-model="store.popover.trigger_mode" @change="handleSave" />
+                {{ t('Auto trigger on selection') }}
+              </label>
+              <div class="apl-settings-radio-shortcut-row">
+                <label class="apl-settings-radio apl-settings-radio--inline">
+                  <input class="apl-settings-trigger-mode" type="radio" value="shortcut" v-model="store.popover.trigger_mode" @change="handleSave" />
+                  {{ t('Trigger with shortcut') }}
+                </label>
+                <div class="apl-settings-shortcut-group">
+                  <label class="apl-settings-field apl-settings-field--shortcut-inline">
+                    <span>{{ t('Shortcut') }}</span>
+                    <input class="apl-settings-shortcut-input" type="text" readonly v-model="store.popover.shortcut_combo" :disabled="store.popover.trigger_mode !== 'shortcut'" />
+                  </label>
+                </div>
+              </div>
+              <div class="apl-settings-shortcut-group">
+                <div class="apl-settings-hint">{{ t('Select text and hold shortcut key to translate.') }}</div>
+              </div>
+            </div>
+            <div style="flex: 1; padding-top: 5px;">
+              <label class="apl-settings-toggle apl-settings-toggle--inline" :class="{ 'apl-highlight-new': isNewFeature }">
+                <input type="checkbox" v-model="store.toolSettings.enable_edit_field_during_review" @change="handleSave" />
+                {{ t('Ctrl + Click field: edit field during review') }}
+                <span v-if="isNewFeature" class="apl-new-badge">NEW</span>
               </label>
             </div>
-          </div>
-          <div class="apl-settings-shortcut-group">
-            <div class="apl-settings-hint">{{ t('Select text and hold shortcut key to translate.') }}</div>
           </div>
         </div>
 
@@ -286,4 +307,30 @@ function handleFontSizeInput(e: Event) {
 
 <style>
 @import './styles/settings-modal.css';
+
+.apl-highlight-new {
+  animation: apl-pulse-glow 2s infinite alternate;
+  border-radius: 8px;
+  padding: 4px 8px;
+  margin-left: -8px;
+  background: rgba(255, 165, 0, 0.1);
+}
+
+.apl-new-badge {
+  background-color: #ff4757;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 12px;
+  margin-left: 8px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+@keyframes apl-pulse-glow {
+  0% { box-shadow: 0 0 0px rgba(255, 165, 0, 0); }
+  100% { box-shadow: 0 0 10px rgba(255, 165, 0, 0.5); }
+}
 </style>

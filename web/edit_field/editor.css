@@ -1,0 +1,18 @@
+/* !important: card templates (e.g. Nocturne) style these elements heavily and
+   would otherwise hide the outline; the reference add-on did the same. */
+.lfe-editing {
+  outline: 2px solid #1971c2 !important;
+  border-radius: 3px;
+  padding: 2px 4px;
+  min-height: 1em;
+}
+
+body.night_mode .lfe-editing,
+body.nightMode .lfe-editing,
+.card.night_mode .lfe-editing {
+  outline-color: #4a9eff !important;
+}
+
+.lfe-wrap {
+  display: inline;
+}

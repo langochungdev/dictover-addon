@@ -25,7 +25,9 @@ export const useSettingsStore = defineStore('settings', () => {
   const toolSettings = ref({
     enable_lookup: true,
     enable_translate: true,
-    enable_audio: true
+    enable_audio: true,
+    enable_edit_field_during_review: false,
+    seen_edit_field_new: (window as any).__aplRuntimeBootstrap?.seen_edit_field_new ?? false
   })
 
   watch(() => popover.value.theme, (newTheme) => {
@@ -64,7 +66,9 @@ export const useSettingsStore = defineStore('settings', () => {
       toolSettings.value = {
         enable_lookup: data.settings.enable_lookup ?? toolSettings.value.enable_lookup,
         enable_translate: data.settings.enable_translate ?? toolSettings.value.enable_translate,
-        enable_audio: data.settings.enable_audio ?? toolSettings.value.enable_audio
+        enable_audio: data.settings.enable_audio ?? toolSettings.value.enable_audio,
+        enable_edit_field_during_review: data.settings.enable_edit_field_during_review ?? toolSettings.value.enable_edit_field_during_review,
+        seen_edit_field_new: data.settings.seen_edit_field_new ?? toolSettings.value.seen_edit_field_new
       }
     }
     isLoaded.value = true
@@ -80,6 +84,8 @@ export const useSettingsStore = defineStore('settings', () => {
         enable_lookup: toolSettings.value.enable_lookup,
         enable_translate: toolSettings.value.enable_translate,
         enable_audio: toolSettings.value.enable_audio,
+        enable_edit_field_during_review: toolSettings.value.enable_edit_field_during_review,
+        seen_edit_field_new: toolSettings.value.seen_edit_field_new,
         auto_play_audio_mode: popover.value.auto_play_audio_mode,
         auto_play_audio: popover.value.auto_play_audio_mode !== 'off',
         hide_home_settings_button: popover.value.hide_home_settings_button,

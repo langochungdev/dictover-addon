@@ -42,6 +42,7 @@ const translations: Record<string, Record<string, string>> = {
     'French': 'French',
     'Support my work': 'Support my work',
     'Thank you beautiful people\nfor your support!': 'Thank you beautiful people\nfor your support!',
+    'Ctrl + Click field: edit field during review': 'Ctrl + Click field: edit field during review',
   },
   vi: {
     'Input Language': 'Ngôn ngữ đầu vào',
@@ -83,6 +84,7 @@ const translations: Record<string, Record<string, string>> = {
     'French': 'Tiếng Pháp',
     'Support my work': 'Ủng hộ dự án',
     'Thank you beautiful people\nfor your support!': 'Cảm ơn trai đẹp gái đẹp\nđã ủng hộ ạ!',
+    'Ctrl + Click field: edit field during review': 'Ctrl + Click field: chỉnh sửa ngay lúc ôn tập',
   },
   ja: {
     'Input Language': '入力言語',
@@ -123,6 +125,7 @@ const translations: Record<string, Record<string, string>> = {
     'French': 'フランス語',
     'Support my work': 'プロジェクトを支援する',
     'Thank you beautiful people\nfor your support!': 'ご支援ありがとうございます、\n美男美女の皆様！',
+    'Ctrl + Click field: edit field during review': 'Ctrl + クリック: レビュー中にフィールドを編集',
   },
   ko: {
     'Input Language': '입력 언어',
@@ -163,6 +166,7 @@ const translations: Record<string, Record<string, string>> = {
     'French': '프랑스어',
     'Support my work': '프로젝트 후원하기',
     'Thank you beautiful people\nfor your support!': '후원해 주신 멋진 분들\n정말 감사합니다!',
+    'Ctrl + Click field: edit field during review': 'Ctrl + 클릭: 리뷰 중 필드 편집',
   },
   'zh-CN': {
     'Input Language': '输入语言',
@@ -203,6 +207,7 @@ const translations: Record<string, Record<string, string>> = {
     'French': '法语',
     'Support my work': '支持本项目',
     'Thank you beautiful people\nfor your support!': '感谢各位帅哥美女\n的支持！',
+    'Ctrl + Click field: edit field during review': 'Ctrl + 点击: 复习时编辑字段',
   },
   ru: {
     'Input Language': 'Язык ввода',
@@ -243,6 +248,7 @@ const translations: Record<string, Record<string, string>> = {
     'French': 'Французский',
     'Support my work': 'Поддержать проект',
     'Thank you beautiful people\nfor your support!': 'Спасибо всем прекрасным людям\nза вашу поддержку!',
+    'Ctrl + Click field: edit field during review': 'Ctrl + Клик по полю: редактировать во время повторения',
   },
   fi: {
     'Input Language': 'Syöttökieli',
@@ -283,6 +289,7 @@ const translations: Record<string, Record<string, string>> = {
     'French': 'Ranska',
     'Support my work': 'Tue työtäni',
     'Thank you beautiful people\nfor your support!': 'Kiitos kauniit ihmiset\ntuestanne!',
+    'Ctrl + Click field: edit field during review': 'Ctrl + Klikkaa kenttää: muokkaa kenttää kertaamisen aikana',
   },
   de: {
     'Input Language': 'Eingabesprache',
@@ -323,6 +330,7 @@ const translations: Record<string, Record<string, string>> = {
     'French': 'Französisch',
     'Support my work': 'Meine Arbeit unterstützen',
     'Thank you beautiful people\nfor your support!': 'Danke an alle wunderbaren Menschen\nfür eure Unterstützung!',
+    'Ctrl + Click field: edit field during review': 'Ctrl + Klick auf Feld: Feld während der Überprüfung bearbeiten',
   },
   fr: {
     'Input Language': 'Langue de saisie',
@@ -363,6 +371,7 @@ const translations: Record<string, Record<string, string>> = {
     'French': 'Français',
     'Support my work': 'Soutenir mon travail',
     'Thank you beautiful people\nfor your support!': 'Merci à toutes les belles personnes\npour votre soutien !',
+    'Ctrl + Click field: edit field during review': 'Ctrl + Clic sur le champ: modifier le champ pendant la révision',
   }
 }
 

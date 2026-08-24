@@ -77,6 +77,8 @@ DEFAULT_RUNTIME_SETTINGS = {
     "popover_definition_language_mode": "output",
     "popover_theme": "dark",
     "popover_font_size_px": 0,
+    "enable_edit_field_during_review": False,
+    "seen_edit_field_new": False,
 }
 
 INSTALL_PING_URL = "https://langochung.me/api/ping/dictover"
@@ -486,6 +488,14 @@ def _runtime_settings_from_config(config: dict) -> dict[str, object]:
         ),
         "popover_theme": _get_value("popover_theme") if _get_value("popover_theme") is not None else DEFAULT_RUNTIME_SETTINGS["popover_theme"],
         "popover_font_size_px": int(_get_value("popover_font_size_px") or DEFAULT_RUNTIME_SETTINGS["popover_font_size_px"]),
+        "enable_edit_field_during_review": _coerce_bool(
+            _get_value("enable_edit_field_during_review"),
+            bool(DEFAULT_RUNTIME_SETTINGS["enable_edit_field_during_review"]),
+        ),
+        "seen_edit_field_new": _coerce_bool(
+            _get_value("seen_edit_field_new"),
+            bool(DEFAULT_RUNTIME_SETTINGS["seen_edit_field_new"]),
+        ),
     }
 
 
@@ -501,6 +511,8 @@ def _save_runtime_settings(partial_settings: dict[str, object]) -> dict[str, obj
         "enable_translate",
         "enable_audio",
         "hide_home_settings_button",
+        "enable_edit_field_during_review",
+        "seen_edit_field_new",
     ]:
         if key in partial_settings:
             merged[key] = _coerce_bool(partial_settings[key], bool(merged[key]))
@@ -582,6 +594,10 @@ def _build_runtime_bootstrap_payload() -> dict[str, object]:
             bool(DEFAULT_RUNTIME_SETTINGS["hide_home_settings_button"]),
         ),
         "popover_theme": runtime_settings.get("popover_theme", DEFAULT_RUNTIME_SETTINGS["popover_theme"]),
+        "seen_edit_field_new": _coerce_bool(
+            runtime_settings.get("seen_edit_field_new"),
+            bool(DEFAULT_RUNTIME_SETTINGS["seen_edit_field_new"]),
+        ),
     }
 
 
@@ -1663,3 +1679,10 @@ gui_hooks.card_will_show.append(on_card_show)
 gui_hooks.webview_will_set_content.append(on_webview_will_set_content)
 gui_hooks.webview_did_receive_js_message.append(on_js_message)
 _ensure_install_ping_once()
+
+# --- Initialize Edit Field Feature ---
+from .features.edit_field.handler import setup_edit_field
+setup_edit_field(
+    lambda: bool(_get_current_runtime_settings().get("enable_edit_field_during_review"))
+)
+
