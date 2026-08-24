@@ -26,7 +26,7 @@ export const useSettingsStore = defineStore('settings', () => {
     enable_lookup: true,
     enable_translate: true,
     enable_audio: true,
-    enable_edit_field_during_review: false,
+    enable_edit_field_during_review: (window as any).__aplRuntimeBootstrap?.enable_edit_field_during_review ?? false,
     seen_edit_field_new: (window as any).__aplRuntimeBootstrap?.seen_edit_field_new ?? false
   })
 

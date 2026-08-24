@@ -598,6 +598,10 @@ def _build_runtime_bootstrap_payload() -> dict[str, object]:
             runtime_settings.get("seen_edit_field_new"),
             bool(DEFAULT_RUNTIME_SETTINGS["seen_edit_field_new"]),
         ),
+        "enable_edit_field_during_review": _coerce_bool(
+            runtime_settings.get("enable_edit_field_during_review"),
+            bool(DEFAULT_RUNTIME_SETTINGS["enable_edit_field_during_review"]),
+        ),
     }
 
 
