@@ -4,7 +4,7 @@ import json
 import time
 from urllib.error import URLError
 from urllib.parse import quote
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 REQUEST_TIMEOUT_SECONDS = 2.5
 REQUEST_RETRY_COUNT = 2
@@ -58,13 +58,21 @@ def _translate_payload(text: str, source_language: str, target_language: str) ->
     query = quote(text)
     url = (
         "https://translate.googleapis.com/translate_a/single"
-        f"?client=gtx&sl={source_language}&tl={target_language}&dt=t&dt=rm&q={query}"
+        f"?client=dict-chrome-ex&sl={source_language}&tl={target_language}&dt=t&dt=rm&q={query}"
+    )
+    
+    req = Request(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Accept": "*/*",
+        }
     )
 
     last_error: Exception | None = None
     for attempt in range(REQUEST_RETRY_COUNT + 1):
         try:
-            with urlopen(url, timeout=REQUEST_TIMEOUT_SECONDS) as response:
+            with urlopen(req, timeout=REQUEST_TIMEOUT_SECONDS) as response:
                 payload = response.read().decode("utf-8", errors="ignore")
             data = json.loads(payload)
             if not isinstance(data, list) or not data:
