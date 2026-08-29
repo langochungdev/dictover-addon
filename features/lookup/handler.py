@@ -174,12 +174,29 @@ def handle_lookup(word: str) -> dict[str, Any]:
         config.get("popover_definition_language_mode")
     )
     lookup_language = source_language
+    
+    translated = ""
+    romanization = ""
+    raw_data = None
+    parsed = None
+    
+    import concurrent.futures
 
     if source_language == "auto":
+        # Translate first to detect language
         try:
-            detected_language = translation_service.detect_language(normalized)
+            translation_data = translation_service.translate_text_full(
+                normalized, source_language, target_language
+            )
+            translated = translation_data["translated"]
+            romanization = translation_data["romanization"]
+            detected_language = translation_data.get("detected_language", "")
+        except Exception:
+            detected_language = ""
+
+        try:
             lookup_language = translation_service.normalize_detected_language(
-                detected_language,
+                detected_language or "en",
                 sample_text=normalized,
                 default_language="en",
             )
@@ -189,10 +206,78 @@ def handle_lookup(word: str) -> dict[str, Any]:
         if lookup_language == "ja" and _is_pure_cjk_ideograph(normalized):
             lookup_language = "zh-CN"
 
+        try:
+            raw_data = dictionary_api.fetch_definition(
+                normalized, source_language=lookup_language
+            )
+        except LookupError:
+            if not translated:
+                return {"type": "error", "message": "Khong tim thay tu nay."}
+            audio_url = tts_service.build_google_tts_url(normalized, lookup_language)
+            return {
+                "type": "translate",
+                "original": normalized,
+                "translated": translated,
+                "phonetic": romanization,
+                "audio_url": audio_url,
+                "audio_lang": lookup_language,
+            }
+        except Exception:
+            if not translated:
+                return {"type": "error", "message": "Khong the tra tu luc nay."}
+            audio_url = tts_service.build_google_tts_url(normalized, lookup_language)
+            return {
+                "type": "translate",
+                "original": normalized,
+                "translated": translated,
+                "phonetic": romanization,
+                "audio_url": audio_url,
+                "audio_lang": lookup_language,
+            }
+    else:
+        if lookup_language == "ja" and _is_pure_cjk_ideograph(normalized):
+            lookup_language = "zh-CN"
+            
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            future_dict = executor.submit(dictionary_api.fetch_definition, normalized, source_language=lookup_language)
+            future_trans = executor.submit(translation_service.translate_text_full, normalized, lookup_language, target_language)
+            
+            try:
+                translation_data = future_trans.result()
+                translated = translation_data["translated"]
+                romanization = translation_data["romanization"]
+            except Exception:
+                translated = "Khong the dich nghia luc nay."
+                romanization = ""
+                
+            try:
+                raw_data = future_dict.result()
+            except LookupError:
+                if not translated or translated == "Khong the dich nghia luc nay.":
+                    return {"type": "error", "message": "Khong tim thay tu nay."}
+                audio_url = tts_service.build_google_tts_url(normalized, lookup_language)
+                return {
+                    "type": "translate",
+                    "original": normalized,
+                    "translated": translated if translated != "Khong the dich nghia luc nay." else "",
+                    "phonetic": romanization,
+                    "audio_url": audio_url,
+                    "audio_lang": lookup_language,
+                }
+            except Exception:
+                if not translated or translated == "Khong the dich nghia luc nay.":
+                    return {"type": "error", "message": "Khong the tra tu luc nay."}
+                audio_url = tts_service.build_google_tts_url(normalized, lookup_language)
+                return {
+                    "type": "translate",
+                    "original": normalized,
+                    "translated": translated if translated != "Khong the dich nghia luc nay." else "",
+                    "phonetic": romanization,
+                    "audio_url": audio_url,
+                    "audio_lang": lookup_language,
+                }
+
     try:
-        raw_data = dictionary_api.fetch_definition(
-            normalized, source_language=lookup_language
-        )
         parsed = parse_response(
             raw_data, max_definitions=int(config["max_definitions"])
         )
@@ -204,16 +289,6 @@ def handle_lookup(word: str) -> dict[str, Any]:
 
         if not parsed.get("meanings"):
             return {"type": "error", "message": "Khong tim thay tu nay."}
-
-        try:
-            translation_data = translation_service.translate_text_full(
-                normalized, lookup_language, target_language
-            )
-            translated = translation_data["translated"]
-            romanization = translation_data["romanization"]
-        except Exception:
-            translated = "Khong the dich nghia luc nay."
-            romanization = ""
 
         first_definition = _first_definition_text(parsed.get("meanings") or [])
         definition_target_language = target_language
@@ -235,68 +310,31 @@ def handle_lookup(word: str) -> dict[str, Any]:
             except Exception:
                 definition_display = first_definition
 
-        audio_url = str(parsed.get("audio_url") or "").strip()
+        audio_url = tts_service.build_google_tts_url(
+            parsed.get("word") or normalized, lookup_language
+        )
         if not audio_url:
-            audio_url = tts_service.build_google_tts_url(
-                parsed.get("word") or normalized, lookup_language
-            )
+            audio_url = str(parsed.get("audio_url") or "").strip()
 
         return {
             "type": "lookup",
             "word": parsed.get("word") or normalized,
-            "translated": translated,
+            "translated": translated if translated != "Khong the dich nghia luc nay." else "",
             "phonetic": parsed.get("phonetic") or romanization or "",
             "audio_url": audio_url,
             "audio_lang": lookup_language,
             "definition_display": definition_display,
             "meanings": parsed.get("meanings") or [],
         }
-    except LookupError:
-        try:
-            translation_data = translation_service.translate_text_full(
-                normalized,
-                lookup_language,
-                target_language,
-            )
-            translated = translation_data["translated"].strip()
-            romanization = translation_data["romanization"].strip()
-        except Exception:
-            translated = ""
-            romanization = ""
-
-        if not translated:
-            return {"type": "error", "message": "Khong tim thay tu nay."}
-
-        audio_url = tts_service.build_google_tts_url(normalized, lookup_language)
-        return {
-            "type": "translate",
-            "original": normalized,
-            "translated": translated,
-            "phonetic": romanization,
-            "audio_url": audio_url,
-            "audio_lang": lookup_language,
-        }
     except Exception:
-        try:
-            translation_data = translation_service.translate_text_full(
-                normalized,
-                lookup_language,
-                target_language,
-            )
-            translated = translation_data["translated"].strip()
-            romanization = translation_data["romanization"].strip()
-        except Exception:
-            translated = ""
-            romanization = ""
-
-        if not translated:
+        if not translated or translated == "Khong the dich nghia luc nay.":
             return {"type": "error", "message": "Khong the tra tu luc nay."}
 
         audio_url = tts_service.build_google_tts_url(normalized, lookup_language)
         return {
             "type": "translate",
             "original": normalized,
-            "translated": translated,
+            "translated": translated if translated != "Khong the dich nghia luc nay." else "",
             "phonetic": romanization,
             "audio_url": audio_url,
             "audio_lang": lookup_language,

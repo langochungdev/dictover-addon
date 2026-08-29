@@ -106,28 +106,25 @@ def handle_translate(phrase: str) -> dict[str, str]:
     source_language = _normalize_source_language(config.get("source_language"))
     target_language = _normalize_target_language(config.get("target_language"))
 
-    tts_language = source_language
-    if source_language == "auto":
-        try:
-            detected = translation_service.detect_language(original)
-            tts_language = translation_service.normalize_detected_language(
-                detected,
-                sample_text=original,
-                default_language="en",
-            )
-        except Exception:
-            tts_language = "en"
-
     try:
         translation_data = translation_service.translate_text_full(
             original,
-            tts_language,
+            source_language,
             target_language,
         )
         translated = translation_data["translated"]
         romanization = translation_data["romanization"]
+        detected = translation_data.get("detected_language", "")
     except Exception:
         return {"type": "error", "message": "Khong the dich doan van nay."}
+
+    tts_language = source_language
+    if source_language == "auto":
+        tts_language = translation_service.normalize_detected_language(
+            detected,
+            sample_text=original,
+            default_language="en",
+        )
 
     audio_url = tts_service.build_google_tts_url(original, tts_language)
 

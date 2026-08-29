@@ -4,6 +4,7 @@ import html
 import json
 import re
 import time
+import concurrent.futures
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
@@ -26,8 +27,8 @@ WIKITEXT_LINK_PATTERN = re.compile(r"\[\[([^\]]+)\]\]")
 WIKITEXT_FORMATTING_PATTERN = re.compile(r"'{2,}")
 AUDIO_TEMPLATE_PATTERN = re.compile(r"\{\{\s*audio\s*\|([^}]*)\}\}", re.IGNORECASE)
 MEDIA_FILENAME_PATTERN = re.compile(r"([^|{}]+\.(?:ogg|oga|mp3|wav))", re.IGNORECASE)
-REQUEST_RETRY_COUNT = 2
-REQUEST_RETRY_DELAY_SECONDS = 0.3
+REQUEST_RETRY_COUNT = 1
+REQUEST_RETRY_DELAY_SECONDS = 0.15
 ZH_WIKTIONARY_CHINESE_SECTIONS = {"漢語", "中文", "官話", "粵語"}
 ZH_STRUCTURAL_HEADINGS = {
     "釋義", "字源", "發音", "組詞", "衍生字", "來源", "參見",
@@ -452,69 +453,24 @@ def _fetch_wiktionary(word: str, source_language: str, timeout: int) -> list[dic
 
 
 def fetch_definition(
-    word: str, source_language: str = "en", timeout: int = 5
+    word: str, source_language: str = "en", timeout: int = 3
 ) -> list[dict]:
     normalized = (word or "").strip()
     if not normalized:
         raise LookupError("Missing word")
 
     resolved_source = _normalize_source_language(source_language)
-    normalized_for_dictionaryapi = normalized.lower()
 
     if resolved_source == "ko":
         return _fetch_naver_kovi(normalized, timeout)
 
-    if resolved_source != "en":
-        try:
-            rest_data = _fetch_wiktionary(normalized, resolved_source, timeout)
-            if _extract_first_audio_from_entries(rest_data):
-                return rest_data
-
-            try:
-                action_data = _fetch_wiktionary_action(
-                    normalized, resolved_source, timeout
-                )
-            except (LookupError, RuntimeError):
-                return rest_data
-
-            action_audio = _extract_first_audio_from_entries(action_data)
-            if action_audio:
-                first_entry = rest_data[0] if isinstance(rest_data[0], dict) else {}
-                first_entry["phonetics"] = [{"audio": action_audio}]
-                return rest_data
-
-            return rest_data
-        except LookupError as primary_error:
-            try:
-                return _fetch_wiktionary_action(normalized, resolved_source, timeout)
-            except RuntimeError:
-                raise primary_error
-        except RuntimeError:
-            return _fetch_wiktionary_action(normalized, resolved_source, timeout)
-
+    # Wiktionary REST is primary for all languages (dictionaryapi.dev excluded due to reliability issues)
     try:
-        return _fetch_dictionaryapi(normalized_for_dictionaryapi, timeout)
+        return _fetch_wiktionary(normalized, resolved_source, timeout)
     except LookupError as primary_error:
         try:
-            rest_data = _fetch_wiktionary(normalized, resolved_source, timeout)
-            if _extract_first_audio_from_entries(rest_data):
-                return rest_data
-
-            try:
-                action_data = _fetch_wiktionary_action(
-                    normalized, resolved_source, timeout
-                )
-            except (LookupError, RuntimeError):
-                return rest_data
-
-            action_audio = _extract_first_audio_from_entries(action_data)
-            if action_audio:
-                first_entry = rest_data[0] if isinstance(rest_data[0], dict) else {}
-                first_entry["phonetics"] = [{"audio": action_audio}]
-            return rest_data
-        except LookupError:
-            raise primary_error
-        except RuntimeError:
+            return _fetch_wiktionary_action(normalized, resolved_source, timeout)
+        except (LookupError, RuntimeError):
             raise primary_error
     except RuntimeError:
-        return _fetch_wiktionary(normalized, resolved_source, timeout)
+        return _fetch_wiktionary_action(normalized, resolved_source, timeout)

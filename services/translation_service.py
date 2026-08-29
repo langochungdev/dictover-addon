@@ -7,8 +7,8 @@ from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 REQUEST_TIMEOUT_SECONDS = 2.5
-REQUEST_RETRY_COUNT = 2
-REQUEST_RETRY_DELAY_SECONDS = 0.3
+REQUEST_RETRY_COUNT = 1
+REQUEST_RETRY_DELAY_SECONDS = 0.1
 
 TRADITIONAL_ONLY_CHARS = frozenset(
     "萬與專業東絲兩嚴喪個豐為麗舉麼義烏樂喬習鄉書買亂爭於虧雲亞產畝親褻複見覺觀說讀變讓護邊現這還體龍"
@@ -107,7 +107,13 @@ def _translate_online_full(text: str, source_language: str, target_language: str
     if not translated_text:
         raise RuntimeError("online translator returned an empty translation")
 
-    return {"translated": translated_text, "romanization": romanization}
+    detected_language = data[2] if len(data) > 2 and isinstance(data[2], str) else ""
+
+    return {
+        "translated": translated_text,
+        "romanization": romanization,
+        "detected_language": detected_language.strip()
+    }
 
 
 def _translate_online(text: str, source_language: str, target_language: str) -> str:
