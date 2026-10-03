@@ -27,8 +27,8 @@ WIKITEXT_LINK_PATTERN = re.compile(r"\[\[([^\]]+)\]\]")
 WIKITEXT_FORMATTING_PATTERN = re.compile(r"'{2,}")
 AUDIO_TEMPLATE_PATTERN = re.compile(r"\{\{\s*audio\s*\|([^}]*)\}\}", re.IGNORECASE)
 MEDIA_FILENAME_PATTERN = re.compile(r"([^|{}]+\.(?:ogg|oga|mp3|wav))", re.IGNORECASE)
-REQUEST_RETRY_COUNT = 1
-REQUEST_RETRY_DELAY_SECONDS = 0.15
+REQUEST_RETRY_COUNT = 0
+REQUEST_RETRY_DELAY_SECONDS = 0.1
 ZH_WIKTIONARY_CHINESE_SECTIONS = {"漢語", "中文", "官話", "粵語"}
 ZH_STRUCTURAL_HEADINGS = {
     "釋義", "字源", "發音", "組詞", "衍生字", "來源", "參見",
@@ -453,7 +453,7 @@ def _fetch_wiktionary(word: str, source_language: str, timeout: int) -> list[dic
 
 
 def fetch_definition(
-    word: str, source_language: str = "en", timeout: int = 3
+    word: str, source_language: str = "en", timeout: int = 2
 ) -> list[dict]:
     normalized = (word or "").strip()
     if not normalized:

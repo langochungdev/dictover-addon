@@ -183,7 +183,7 @@ def handle_lookup(word: str) -> dict[str, Any]:
     import concurrent.futures
 
     if source_language == "auto":
-        # Translate first to detect language
+        # Translate first to detect language (necessary for auto mode)
         try:
             translation_data = translation_service.translate_text_full(
                 normalized, source_language, target_language
@@ -208,7 +208,7 @@ def handle_lookup(word: str) -> dict[str, Any]:
 
         try:
             raw_data = dictionary_api.fetch_definition(
-                normalized, source_language=lookup_language
+                normalized, source_language=lookup_language, timeout=2
             )
         except LookupError:
             if not translated:
@@ -234,6 +234,7 @@ def handle_lookup(word: str) -> dict[str, Any]:
                 "audio_url": audio_url,
                 "audio_lang": lookup_language,
             }
+
     else:
         if lookup_language == "ja" and _is_pure_cjk_ideograph(normalized):
             lookup_language = "zh-CN"

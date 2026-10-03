@@ -76,7 +76,7 @@ function handleMouseUp(event: MouseEvent) {
     }
 
     executeTranslation(selection!, text)
-  }, 300)
+  }, 100)
 }
 
 function handleKeyUp(event: KeyboardEvent) {

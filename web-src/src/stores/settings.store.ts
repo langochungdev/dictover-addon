@@ -14,7 +14,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const popover = ref({
     trigger_mode: 'auto',
     shortcut_combo: 'Shift',
-    auto_play_audio_mode: 'off',
+    auto_play_audio_mode: 'word',
     hide_home_settings_button: (window as any).__aplRuntimeBootstrap?.hide_home_settings_button ?? false,
     theme: (window as any).__aplRuntimeBootstrap?.popover_theme ?? 'dark',
     panel_open_mode: 'none',

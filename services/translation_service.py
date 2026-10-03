@@ -6,8 +6,8 @@ from urllib.error import URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
-REQUEST_TIMEOUT_SECONDS = 2.5
-REQUEST_RETRY_COUNT = 1
+REQUEST_TIMEOUT_SECONDS = 2.0
+REQUEST_RETRY_COUNT = 0
 REQUEST_RETRY_DELAY_SECONDS = 0.1
 
 TRADITIONAL_ONLY_CHARS = frozenset(

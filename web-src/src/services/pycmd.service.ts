@@ -25,7 +25,7 @@ export const pycmdService = {
       popover: {
         trigger_mode: 'auto',
         shortcut_combo: 'Shift',
-        auto_play_audio_mode: 'off',
+        auto_play_audio_mode: 'word',
         hide_home_settings_button: false,
         theme: 'dark',
         panel_open_mode: 'none',

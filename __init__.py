@@ -68,8 +68,8 @@ DEFAULT_RUNTIME_SETTINGS = {
     "enable_lookup": True,
     "enable_translate": True,
     "enable_audio": True,
-    "auto_play_audio": False,
-    "auto_play_audio_mode": "off",
+    "auto_play_audio": True,
+    "auto_play_audio_mode": "word",
     "hide_home_settings_button": False,
     "popover_trigger_mode": "auto",
     "popover_shortcut": "Shift",
@@ -81,7 +81,7 @@ DEFAULT_RUNTIME_SETTINGS = {
     "seen_edit_field_new": False,
 }
 
-INSTALL_PING_URL = "https://langochung.me/api/ping/dictover"
+INSTALL_PING_URL = "https://langochung.vercel.app/api/ping/dictover"
 INSTALL_PING_MARKER = ADDON_DIR / ".install_ping_v1.json"
 INSTALL_PING_STATE_KEY = "_install_ping"
 
