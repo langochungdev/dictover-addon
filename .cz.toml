@@ -1,6 +1,6 @@
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.13.3"
+version = "0.13.6"
 version_scheme = "semver"
 tag_format = "v$version"
 version_files = [
